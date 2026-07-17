@@ -130,7 +130,7 @@
 <script src="supabase-config.js"></script>
 <script src="serviexpress.js"></script>
 <script>
-  const WHATSAPP_OPERADOR = "59170000000"; // reemplazar con el número real
+  const WHATSAPP_OPERADOR = "59176433716"; // número temporal del operador
 
   async function cargarChips(){
     const { data: categorias, error: ec } = await supabaseClient.from('categorias').select('id,nombre').eq('activa', true).order('nombre');
