@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ServiExpress — Servicios para tu hogar u oficina en Santa Cruz</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,600;9..144,900&family=Archivo:wght@400;500;600;700&display=swap');
+  :root{ --rust:#c1502e; --ink:#1c1a17; --paper:#f4ede2; --paper-warm:#ece2d2; --teal:#1f4741; }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--paper); color:var(--ink); font-family:'Archivo',sans-serif; line-height:1.55; padding:0 6vw 60px;}
+  h1{font-family:'Fraunces',serif; font-weight:900; font-size:clamp(2rem,5vw,3.2rem); margin:48px 0 10px; max-width:16ch;}
+  p.lede{color:#4a453d; font-size:1.1rem; max-width:56ch; margin-bottom:14px;}
+  .trust{display:flex; flex-wrap:wrap; gap:8px 18px; color:var(--teal); font-weight:600; font-size:0.9rem; margin:18px 0 34px;}
+  .cards{display:grid; grid-template-columns:1fr 1fr; gap:20px; max-width:760px;}
+  @media(max-width:560px){ .cards{grid-template-columns:1fr;} }
+  .cta{display:block; text-decoration:none; color:var(--ink); background:var(--paper-warm); border:2px solid var(--ink); border-radius:18px; padding:28px; box-shadow:6px 6px 0 var(--ink); transition:transform .08s, box-shadow .08s;}
+  .cta:hover{transform:translate(-2px,-2px); box-shadow:8px 8px 0 var(--ink);}
+  .cta h2{font-family:'Fraunces',serif; font-weight:900; font-size:1.4rem; margin-bottom:6px;}
+  .cta.prov{background:var(--teal); color:#fff; box-shadow:6px 6px 0 var(--ink);}
+  .cta.prov h2{color:#fff;}
+  .cta .arrow{margin-top:14px; font-weight:700;}
+  footer{margin-top:44px; font-size:0.8rem; color:#7a7264;}
+</style>
+</head>
+<body>
+  <h1>Servicios para tu hogar u oficina, sin vueltas.</h1>
+  <p class="lede">Conectamos hogares, oficinas y pequeñas empresas de Santa Cruz de la Sierra con proveedores verificados: plomería, electricidad, limpieza, jardinería, pintura, aire acondicionado y más.</p>
+  <div class="trust">
+    <span>✓ Proveedores verificados</span>
+    <span>✓ Precios transparentes</span>
+    <span>✓ Reseñas reales</span>
+    <span>✓ Coordinación por WhatsApp</span>
+  </div>
+
+  <div class="cards">
+    <a class="cta" href="cliente.html">
+      <h2>Necesito un servicio</h2>
+      <p>Contanos qué necesitás y te derivamos con un proveedor verificado.</p>
+      <div class="arrow">Solicitar un servicio →</div>
+    </a>
+    <a class="cta prov" href="proveedor.html">
+      <h2>Ofrezco servicios</h2>
+      <p>Registro gratuito. Pagás Bs 10 solo cuando aceptás una solicitud.</p>
+      <div class="arrow">Sumarme como proveedor →</div>
+    </a>
+  </div>
+
+  <footer>ServiExpress (nombre provisional) · Santa Cruz de la Sierra, Bolivia</footer>
+</body>
+</html>

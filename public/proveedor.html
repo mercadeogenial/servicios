@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ServiExpress — Registro de proveedores</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,600;9..144,900&family=Archivo:wght@400;500;600;700&display=swap');
+  :root{
+    --rust:#c1502e; --ink:#1c1a17; --paper:#f4ede2; --paper-warm:#ece2d2; --teal:#1f4741; --err:#9c3d20;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--paper); color:var(--ink); font-family:'Archivo',sans-serif; line-height:1.5; padding:0 6vw 60px;}
+  h1{font-family:'Fraunces',serif; font-weight:900; font-size:clamp(1.8rem,4vw,2.6rem); margin:36px 0 6px;}
+  p.lede{color:#4a453d; margin-bottom:28px; max-width:60ch;}
+  .card{background:var(--paper-warm); border:2px solid var(--ink); border-radius:18px; padding:32px; max-width:640px; margin:0 auto; box-shadow:8px 8px 0 var(--teal);}
+  label{display:block; font-size:0.8rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; margin:18px 0 6px; color:var(--teal);}
+  label:first-of-type{margin-top:0;}
+  input, select, textarea{width:100%; padding:12px 14px; border:2px solid var(--ink); border-radius:10px; font-family:'Archivo',sans-serif; font-size:1rem; background:#fff; color:var(--ink);}
+  input.field-error, select.field-error{border-color:var(--err); background:#fbeee9;}
+  .chip-group.field-error{outline:2px solid var(--err); outline-offset:4px; border-radius:12px;}
+  .hint{font-size:0.75rem; color:#7a7264; margin-top:5px;}
+  .field-msg{font-size:0.75rem; color:var(--err); margin-top:5px; display:none;}
+  .field-msg.show{display:block;}
+  .row2{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  @media(max-width:480px){ .row2{grid-template-columns:1fr;} }
+  .chips{display:flex; flex-wrap:wrap; gap:8px; margin-top:6px;}
+  .chip{border:2px solid var(--ink); border-radius:100px; padding:8px 14px; font-size:0.85rem; cursor:pointer; background:#fff; font-weight:600; user-select:none;}
+  .chip.selected{background:var(--teal); color:#fff; border-color:var(--teal);}
+  .checkbox-row{display:flex; align-items:flex-start; gap:10px; margin-top:20px;}
+  .checkbox-row input{width:auto; margin-top:4px;}
+  .fotos-preview{display:flex; flex-wrap:wrap; gap:10px; margin-top:10px;}
+  .fotos-preview .thumb{width:72px; height:72px; border-radius:10px; border:2px solid var(--ink); object-fit:cover;}
+  .submit-btn{margin-top:26px; width:100%; padding:17px; border-radius:12px; border:2px solid var(--ink); background:var(--teal); color:#fff; font-family:'Fraunces',serif; font-weight:900; font-size:1.1rem; cursor:pointer; box-shadow:5px 5px 0 var(--ink); transition:transform .08s, box-shadow .08s;}
+  .submit-btn:hover:not(:disabled){transform:translate(-2px,-2px); box-shadow:7px 7px 0 var(--ink);}
+  .submit-btn:disabled{opacity:0.6; cursor:not-allowed;}
+  #successBox, #errorBox{display:none; max-width:640px; margin:20px auto; padding:20px; border-radius:14px; border:2px solid var(--ink); font-weight:600;}
+  #successBox{background:#e4efe6;}
+  #errorBox{background:#f6dcd4;}
+  .trust{margin-top:20px; font-size:0.85rem; color:var(--teal); font-weight:600;}
+  a.wa-link{display:inline-block; margin-top:10px; background:var(--rust); color:#fff; padding:12px 20px; border-radius:10px; text-decoration:none; font-weight:700;}
+</style>
+</head>
+<body>
+  <h1>Sumate como proveedor</h1>
+  <p class="lede">Registro gratuito. Solo pagás Bs 10 cuando vos decidís aceptar una solicitud — rechazar siempre es gratis.</p>
+
+  <div class="card">
+    <form id="provForm" novalidate>
+      <label>Nombre completo o razón social</label>
+      <input id="nombre" required placeholder="Ej. Juan Pérez / Climatización Pérez">
+      <div class="field-msg" data-for="nombre">Ingresá tu nombre o razón social.</div>
+
+      <div class="row2">
+        <div>
+          <label>WhatsApp</label>
+          <input id="whatsapp" required inputmode="tel" placeholder="Ej. 71234567">
+          <div class="hint">8 dígitos, empieza en 6 o 7.</div>
+          <div class="field-msg" data-for="whatsapp">Número de WhatsApp boliviano inválido.</div>
+        </div>
+        <div>
+          <label>Años de experiencia</label>
+          <input id="experiencia" type="number" min="0" required>
+          <div class="field-msg" data-for="experiencia">Ingresá tus años de experiencia.</div>
+        </div>
+      </div>
+
+      <label>Categorías que ofrecés (elegí una o más)</label>
+      <div class="chips chip-group" id="categorias"></div>
+      <div class="field-msg" data-for="categorias">Elegí al menos una categoría.</div>
+
+      <label>Zona(s) donde trabajás</label>
+      <div class="chips chip-group" id="zonas"></div>
+      <div class="field-msg" data-for="zonas">Elegí al menos una zona.</div>
+
+      <label>¿Trabajás solo o con equipo?</label>
+      <select id="modoTrabajo" required>
+        <option value="">Seleccioná una opción</option>
+        <option>Solo</option><option>Con 1-2 ayudantes</option><option>Con equipo de 3 o más</option>
+      </select>
+      <div class="field-msg" data-for="modoTrabajo">Seleccioná una opción.</div>
+
+      <label>Situación tributaria (informativo, no afecta tu acceso a la plataforma)</label>
+      <select id="tributaria">
+        <option value="">Preferís no decir</option>
+        <option>Régimen Simplificado (RTS)</option>
+        <option>Régimen General</option>
+        <option>No tengo registro tributario actualmente</option>
+        <option>Prefiero no decir</option>
+      </select>
+
+      <label>Método de cobro preferido</label>
+      <select id="cobro" required>
+        <option value="">Seleccioná una opción</option>
+        <option>QR Simple (banco)</option><option>Tigo Money</option><option>Ambos</option>
+      </select>
+      <div class="field-msg" data-for="cobro">Seleccioná tu método de cobro.</div>
+
+      <label>Disponibilidad general</label>
+      <input id="disponibilidad" placeholder="Ej. Lunes a sábado, 8am-6pm">
+
+      <label>Fotos de trabajos anteriores (opcional, generan confianza)</label>
+      <input id="fotos" type="file" accept="image/*" multiple>
+      <div class="hint">Hasta 5 imágenes de 5 MB.</div>
+      <div class="fotos-preview" id="fotosPreview"></div>
+
+      <div class="checkbox-row">
+        <input type="checkbox" id="terminos" required>
+        <label style="margin:0; text-transform:none; font-size:0.85rem; font-weight:400; color:var(--ink);">
+          Acepto los Términos de Uso para Proveedores. Entiendo que actúo como contratista independiente
+          (Art. 732 y siguientes del Código Civil), que ServiExpress no es mi empleador, y que se me cobrará
+          Bs 10 solo cuando yo acepte una solicitud.
+        </label>
+      </div>
+      <div class="field-msg" data-for="terminos">Necesitás aceptar los Términos de Uso.</div>
+
+      <button type="submit" class="submit-btn" id="submitBtn">Registrarme →</button>
+    </form>
+
+    <div id="successBox">
+      ✓ Registro completo. Te vamos a contactar por WhatsApp cuando haya una solicitud para vos.
+      <br><a class="wa-link" id="waLink" href="#" target="_blank">Confirmar mi registro por WhatsApp →</a>
+    </div>
+    <div id="errorBox"></div>
+
+    <p class="trust">✓ Sin costo de registro &nbsp; ✓ Rechazar solicitudes es siempre gratis &nbsp; ✓ Cobro directo del cliente</p>
+  </div>
+
+<script src="supabase-config.js"></script>
+<script src="serviexpress.js"></script>
+<script>
+  const WHATSAPP_OPERADOR = "59170000000"; // reemplazar con el número real
+
+  async function cargarChips(){
+    const { data: categorias, error: ec } = await supabaseClient.from('categorias').select('id,nombre').eq('activa', true).order('nombre');
+    const catBox = document.getElementById('categorias');
+    if(ec){ catBox.innerHTML = '<em>No se pudieron cargar las categorías</em>'; }
+    else (categorias || []).forEach(c=>{
+      const el = document.createElement('div');
+      el.className = 'chip'; el.textContent = c.nombre; el.dataset.id = c.id;
+      el.addEventListener('click', ()=>{ el.classList.toggle('selected'); marcarError('categorias', false); });
+      catBox.appendChild(el);
+    });
+
+    const { data: zonas, error: ez } = await supabaseClient.from('zonas').select('id,nombre').eq('activa', true).order('nombre');
+    const zonaBox = document.getElementById('zonas');
+    if(ez){ zonaBox.innerHTML = '<em>No se pudieron cargar las zonas</em>'; }
+    else (zonas || []).forEach(z=>{
+      const el = document.createElement('div');
+      el.className = 'chip'; el.textContent = z.nombre; el.dataset.id = z.id;
+      el.addEventListener('click', ()=>{ el.classList.toggle('selected'); marcarError('zonas', false); });
+      zonaBox.appendChild(el);
+    });
+  }
+  cargarChips();
+
+  const fotosInput = document.getElementById('fotos');
+  fotosInput.addEventListener('change', ()=>{
+    const prev = document.getElementById('fotosPreview');
+    prev.innerHTML = '';
+    Array.from(fotosInput.files).slice(0, ServiExpress.MAX_FILES).forEach(f=>{
+      if(!f.type.startsWith('image/')) return;
+      const img = document.createElement('img');
+      img.className = 'thumb'; img.src = URL.createObjectURL(f);
+      prev.appendChild(img);
+    });
+  });
+
+  function marcarError(id, mostrar){
+    const el = document.getElementById(id);
+    if(el) el.classList.toggle('field-error', mostrar);
+    const msg = document.querySelector(`.field-msg[data-for="${id}"]`);
+    if(msg) msg.classList.toggle('show', mostrar);
+  }
+
+  function validar(catSel, zonaSel){
+    let ok = true;
+    if(document.getElementById('nombre').value.trim()===''){ marcarError('nombre', true); ok=false; } else marcarError('nombre', false);
+    const waBad = !ServiExpress.normalizarWhatsapp(document.getElementById('whatsapp').value);
+    marcarError('whatsapp', waBad); if(waBad) ok=false;
+    const expBad = document.getElementById('experiencia').value === '';
+    marcarError('experiencia', expBad); if(expBad) ok=false;
+    const modoBad = !document.getElementById('modoTrabajo').value;
+    marcarError('modoTrabajo', modoBad); if(modoBad) ok=false;
+    const cobroBad = !document.getElementById('cobro').value;
+    marcarError('cobro', cobroBad); if(cobroBad) ok=false;
+    if(catSel.length===0){ marcarError('categorias', true); ok=false; }
+    if(zonaSel.length===0){ marcarError('zonas', true); ok=false; }
+    const termBad = !document.getElementById('terminos').checked;
+    marcarError('terminos', termBad); if(termBad) ok=false;
+    return ok;
+  }
+
+  document.getElementById('provForm').addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    document.getElementById('errorBox').style.display = 'none';
+
+    const categoriasSel = Array.from(document.querySelectorAll('#categorias .chip.selected')).map(c=>({id:c.dataset.id, nombre:c.textContent}));
+    const zonasSel = Array.from(document.querySelectorAll('#zonas .chip.selected')).map(z=>({id:z.dataset.id, nombre:z.textContent}));
+
+    if(!validar(categoriasSel, zonasSel)){
+      document.querySelector('.field-error')?.scrollIntoView({behavior:'smooth', block:'center'});
+      return;
+    }
+
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true; btn.textContent = "Enviando…";
+
+    try{
+      let fotos = [];
+      if(fotosInput.files.length){
+        btn.textContent = "Subiendo fotos…";
+        fotos = await ServiExpress.subirFotos(fotosInput.files, 'trabajos', (h,t)=>{ btn.textContent = `Subiendo fotos… ${h}/${t}`; });
+      }
+      btn.textContent = "Enviando…";
+
+      const { data: proveedorId, error } = await supabaseClient.rpc('registrar_proveedor', {
+        p_nombre: document.getElementById('nombre').value,
+        p_whatsapp: document.getElementById('whatsapp').value,
+        p_anos_experiencia: parseInt(document.getElementById('experiencia').value) || null,
+        p_modo_trabajo: document.getElementById('modoTrabajo').value,
+        p_situacion_tributaria: document.getElementById('tributaria').value || null,
+        p_metodo_cobro: document.getElementById('cobro').value,
+        p_disponibilidad: document.getElementById('disponibilidad').value,
+        p_acepto_terminos: document.getElementById('terminos').checked,
+        p_categorias: categoriasSel.map(c=>c.id),
+        p_zonas: zonasSel.map(z=>z.id),
+        p_fotos_trabajos: fotos
+      });
+      if(error) throw error;
+
+      document.getElementById('provForm').style.display = 'none';
+      document.getElementById('successBox').style.display = 'block';
+
+      const msg = `Hola ServiExpress! Quiero confirmar mi registro como proveedor.\n`
+        + `Nombre: ${document.getElementById('nombre').value}\n`
+        + `Categorías: ${categoriasSel.map(c=>c.nombre).join(', ')}\n`
+        + `Zonas: ${zonasSel.map(z=>z.nombre).join(', ')}`;
+      document.getElementById('waLink').href = `https://wa.me/${WHATSAPP_OPERADOR}?text=${encodeURIComponent(msg)}`;
+
+    }catch(err){
+      const box = document.getElementById('errorBox');
+      box.textContent = "Hubo un problema al registrarte: " + (err.message || err);
+      box.style.display = 'block';
+      btn.disabled = false; btn.textContent = "Registrarme →";
+    }
+  });
+</script>
+</body>
+</html>
