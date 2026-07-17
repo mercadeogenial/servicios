@@ -32,6 +32,10 @@
   .prov-select{margin-top:10px; display:flex; flex-wrap:wrap; gap:6px;}
   .prov-chip{border:2px solid var(--teal); color:var(--teal); border-radius:100px; padding:6px 12px; font-size:0.8rem; cursor:pointer;}
   .prov-chip.selected{background:var(--teal); color:#fff;}
+  .prov-chip.zona-match{border-color:var(--rust); color:var(--rust); font-weight:700;}
+  .prov-chip.zona-match.selected{background:var(--rust); color:#fff;}
+  .zona-tag{font-size:0.68rem; font-weight:700; opacity:0.85;}
+  .prov-group-label{width:100%; font-size:0.72rem; text-transform:uppercase; font-weight:700; color:var(--muted,#777); margin-top:6px;}
   .contacto-row{display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-top:1px dashed var(--line); font-size:0.85rem;}
   .fotos-row{display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;}
   .fotos-row a img{width:64px; height:64px; object-fit:cover; border-radius:8px; border:2px solid var(--ink); display:block;}
@@ -97,7 +101,7 @@
     if(t.dataset.tab === 'proveedores') cargarProveedores();
   }));
 
-  function init(){ cargarSolicitudes(); cargarProveedoresCache(); }
+  async function init(){ await cargarProveedoresCache(); cargarSolicitudes(); }
 
   // ---------- SOLICITUDES ----------
   async function cargarSolicitudes(){
@@ -117,7 +121,11 @@
 
   function renderSolicitud(s){
     const yaContactados = (s.solicitud_contactos || []);
-    const candidatos = proveedoresCache.filter(p => !yaContactados.some(c => c.proveedor_id === p.id));
+    const disponibles = proveedoresCache.filter(p => !yaContactados.some(c => c.proveedor_id === p.id));
+    // Solo proveedores de la categoría de la solicitud; los que además coinciden en zona van primero (resaltados).
+    const candidatos = disponibles
+      .filter(p => (p.categorias || []).includes(s.categoria_id))
+      .sort((a, b) => (( (b.zonas||[]).includes(s.zona_id) ? 1 : 0) - ((a.zonas||[]).includes(s.zona_id) ? 1 : 0)));
     return `
       <div class="req-card" data-id="${s.id}">
         <div class="req-head">
@@ -136,7 +144,7 @@
 
         ${s.estado === 'pendiente' || s.estado === 'difundida' ? `
         <div class="prov-select" data-role="candidatos">
-          ${candidatos.map(p => `<div class="prov-chip" data-prov="${p.id}">${p.nombre_razon_social}</div>`).join('') || '<em>No hay más proveedores candidatos para difundir</em>'}
+          ${candidatos.map(p => { const zonaOk = (p.zonas||[]).includes(s.zona_id); return `<div class="prov-chip${zonaOk ? ' zona-match' : ''}" data-prov="${p.id}" title="${zonaOk ? 'Coincide en categoría y zona' : 'Coincide en categoría (otra zona)'}">${p.nombre_razon_social}${zonaOk ? ' <span class="zona-tag">· zona ✓</span>' : ''}</div>`; }).join('') || '<em>No hay proveedores de esta categoría para difundir todavía</em>'}
         </div>
         <div class="req-actions">
           <button class="act primary" data-action="difundir">Enviar a seleccionados →</button>
@@ -202,8 +210,16 @@
 
   // ---------- PROVEEDORES ----------
   async function cargarProveedoresCache(){
-    const { data } = await supabaseClient.from('proveedores').select('id, nombre_razon_social').eq('activo', true);
-    proveedoresCache = data || [];
+    const { data } = await supabaseClient
+      .from('proveedores')
+      .select('id, nombre_razon_social, proveedor_categorias(categoria_id), proveedor_zonas(zona_id)')
+      .eq('activo', true);
+    proveedoresCache = (data || []).map(p => ({
+      id: p.id,
+      nombre_razon_social: p.nombre_razon_social,
+      categorias: (p.proveedor_categorias || []).map(c => c.categoria_id),
+      zonas: (p.proveedor_zonas || []).map(z => z.zona_id)
+    }));
   }
 
   async function cargarProveedores(){
