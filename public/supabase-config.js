@@ -1,11 +1,10 @@
 // ============================================================
-// CONFIGURACIÓN DE SUPABASE — completar con tus datos reales
+// CONFIGURACIÓN DE SUPABASE
 // Se obtienen en: Supabase → tu proyecto → Project Settings → API
+// La clave "anon" es pública por diseño (va en el frontend); el acceso
+// real se controla con las políticas RLS definidas en schema.sql.
 // ============================================================
-const SUPABASE_URL = "https://TU-PROYECTO.supabase.co";
-const SUPABASE_ANON_KEY = "TU-CLAVE-ANON-PUBLICA";
-
-// Esta clave "anon" es segura de exponer en el frontend — está diseñada para eso.
-// El acceso real se controla con las políticas RLS definidas en schema.sql.
+const SUPABASE_URL = "https://vpogkbrgjqfqejhrwxdm.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_STnvZhg5aIvcha903fVXFw_zQfZi4lr";
 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
