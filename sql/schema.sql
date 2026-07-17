@@ -162,10 +162,22 @@ create table if not exists cobros (
   id uuid primary key default uuid_generate_v4(),
   proveedor_id uuid references proveedores(id) not null,
   solicitud_id uuid references solicitudes(id) not null,
-  monto_bs numeric(10,2) not null default 10.00,
+  monto_bs numeric(10,2) not null default 9.00,
   fecha timestamptz default now(),
-  pagado boolean default false -- seguimiento manual del operador en esta etapa
+  pagado boolean default false, -- seguimiento manual del operador en esta etapa
+  concepto text default 'proveedor' -- 'proveedor' (paga para recibir datos del cliente) | 'cliente' (paga para recibir datos del proveedor)
 );
+
+-- ------------------------------------------------------------
+-- Migración: cobro de Bs 9 en ambos lados antes de compartir datos (piloto, QR manual)
+-- ------------------------------------------------------------
+alter table cobros add column if not exists concepto text default 'proveedor';
+-- El proveedor paga Bs 9 para recibir los datos del cliente (se marca por contacto):
+alter table solicitud_contactos add column if not exists pago_confirmado boolean default false;
+alter table solicitud_contactos add column if not exists fecha_pago timestamptz;
+-- El cliente paga Bs 9 para recibir los datos del proveedor asignado:
+alter table solicitudes add column if not exists cliente_pago boolean default false;
+alter table solicitudes add column if not exists fecha_pago_cliente timestamptz;
 
 -- ------------------------------------------------------------
 -- 8. MEDIACIÓN DE DISPUTAS (a discreción de ServiExpress — T. de Uso, Sección 9)
