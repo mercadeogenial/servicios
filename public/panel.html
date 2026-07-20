@@ -7,16 +7,16 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,600;9..144,900&family=Archivo:wght@400;500;600;700&display=swap');
-  :root{ --rust:#c1502e; --ink:#1c1a17; --paper:#f4ede2; --paper-warm:#ece2d2; --teal:#1f4741; --line:#d8cbb3; --ok:#3d7a4f;}
+  :root{ --rust:#c1502e; --rust-dark:#9c3d20; --ink:#1c1a17; --paper:#f4ede2; --paper-warm:#ece2d2; --teal:#1f4741; --line:#d8cbb3; --ok:#3d7a4f;}
   *{box-sizing:border-box; margin:0; padding:0;}
   body{background:var(--paper); color:var(--ink); font-family:'Archivo',sans-serif;}
-  h1,h2{font-family:'Fraunces',serif; font-weight:900;}
+  h1,h2,h3{font-family:'Fraunces',serif; font-weight:900;}
   header{display:flex; justify-content:space-between; align-items:center; padding:20px 4vw; border-bottom:2px solid var(--ink);}
   header h1{font-size:1.4rem;}
   #logoutBtn{background:none; border:2px solid var(--ink); border-radius:8px; padding:8px 16px; cursor:pointer; font-weight:600;}
   main{padding:24px 4vw 60px;}
-  .tabs{display:flex; gap:0; border:2px solid var(--ink); border-radius:12px; overflow:hidden; max-width:600px; margin-bottom:28px;}
-  .tab{flex:1; padding:12px; text-align:center; cursor:pointer; font-weight:700; background:transparent; border:none;}
+  .tabs{display:flex; gap:0; border:2px solid var(--ink); border-radius:12px; overflow:hidden; max-width:720px; margin-bottom:24px;}
+  .tab{flex:1; padding:12px 6px; text-align:center; cursor:pointer; font-weight:700; background:transparent; border:none; font-size:0.9rem;}
   .tab.active{background:var(--ink); color:var(--paper);}
   .tab:not(:last-child){border-right:2px solid var(--ink);}
   .panel{display:none;} .panel.active{display:block;}
@@ -24,11 +24,15 @@
   .req-head{display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:8px;}
   .badge{font-size:0.72rem; text-transform:uppercase; font-weight:700; padding:4px 10px; border-radius:100px; background:var(--teal); color:#fff;}
   .badge.prioridad{background:var(--rust);}
+  .badge.off{background:#999;}
   .req-body{margin-top:10px; font-size:0.92rem;}
-  .req-actions{margin-top:14px; display:flex; gap:10px; flex-wrap:wrap;}
+  .req-actions{margin-top:14px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;}
   button.act{border:2px solid var(--ink); border-radius:8px; padding:8px 14px; background:#fff; cursor:pointer; font-weight:600; font-size:0.85rem;}
   button.act.primary{background:var(--rust); color:#fff;}
   button.act.ok{background:var(--ok); color:#fff;}
+  button.act.ghost{background:transparent;}
+  button.act.danger{background:#b03a2e; color:#fff;}
+  select.inline, input.inline{border:2px solid var(--ink); border-radius:8px; padding:7px 10px; font-family:'Archivo',sans-serif; font-size:0.85rem;}
   .prov-select{margin-top:10px; display:flex; flex-wrap:wrap; gap:6px;}
   .prov-chip{border:2px solid var(--teal); color:var(--teal); border-radius:100px; padding:6px 12px; font-size:0.8rem; cursor:pointer;}
   .prov-chip.selected{background:var(--teal); color:#fff;}
@@ -36,11 +40,34 @@
   .fotos-row{display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;}
   .fotos-row a img{width:64px; height:64px; object-fit:cover; border-radius:8px; border:2px solid var(--ink); display:block;}
   table{width:100%; border-collapse:collapse; margin-top:12px;}
-  th,td{text-align:left; padding:8px; border-bottom:1px solid var(--line); font-size:0.85rem;}
+  th,td{text-align:left; padding:8px; border-bottom:1px solid var(--line); font-size:0.85rem; vertical-align:top;}
   #loginBox{max-width:360px; margin:80px auto; background:var(--paper-warm); border:2px solid var(--ink); border-radius:14px; padding:28px;}
   #loginBox input{width:100%; padding:10px; margin-top:6px; margin-bottom:14px; border:2px solid var(--ink); border-radius:8px;}
   #loginBox button{width:100%; padding:12px; background:var(--ink); color:var(--paper); border:none; border-radius:8px; font-weight:700; cursor:pointer;}
   #appWrap{display:none;}
+
+  .cobro-box{margin-top:14px; padding:14px; border:2px dashed var(--teal); border-radius:12px; background:#fff;}
+  .cobro-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:8px;}
+  .cobro-grid label{font-size:0.72rem; text-transform:uppercase; font-weight:700; color:var(--teal); display:block; margin-bottom:4px;}
+  .cobro-grid .full{grid-column:1 / -1;}
+  .check-row{display:flex; align-items:center; gap:8px; margin-top:8px; font-size:0.85rem;}
+
+  .info-box{background:#fff3cd; border:2px solid var(--rust); border-radius:12px; padding:16px; margin-bottom:20px; font-size:0.88rem; max-width:720px;}
+  .info-box b{color:var(--rust-dark);}
+
+  .modal-overlay{display:none; position:fixed; inset:0; background:rgba(28,26,23,0.6); z-index:100; align-items:center; justify-content:center; padding:20px;}
+  .modal-overlay.open{display:flex;}
+  .modal{background:var(--paper); border:2px solid var(--ink); border-radius:16px; padding:28px; max-width:520px; width:100%; max-height:88vh; overflow-y:auto; box-shadow:10px 10px 0 var(--ink);}
+  .modal h3{margin-bottom:16px;}
+  .modal label{display:block; font-size:0.78rem; font-weight:700; text-transform:uppercase; color:var(--teal); margin:14px 0 5px;}
+  .modal label:first-of-type{margin-top:0;}
+  .modal input, .modal select, .modal textarea{width:100%; padding:10px 12px; border:2px solid var(--ink); border-radius:8px; font-family:'Archivo',sans-serif;}
+  .modal-actions{display:flex; gap:10px; margin-top:22px; justify-content:flex-end;}
+
+  .config-card{background:var(--paper-warm); border:2px solid var(--ink); border-radius:14px; padding:24px; max-width:480px;}
+  .config-card label{display:block; font-size:0.78rem; font-weight:700; text-transform:uppercase; color:var(--teal); margin:14px 0 5px;}
+  .config-card label:first-of-type{margin-top:0;}
+  .config-card input, .config-card select{width:100%; padding:10px 12px; border:2px solid var(--ink); border-radius:8px;}
 </style>
 </head>
 <body>
@@ -62,23 +89,62 @@
     <div class="tabs">
       <button class="tab active" data-tab="solicitudes">Solicitudes</button>
       <button class="tab" data-tab="proveedores">Proveedores</button>
+      <button class="tab" data-tab="clientes">Clientes</button>
+      <button class="tab" data-tab="configuracion">Configuración</button>
     </div>
 
     <div class="panel active" id="panel-solicitudes"><div id="listaSolicitudes">Cargando…</div></div>
-    <div class="panel" id="panel-proveedores"><div id="listaProveedores">Cargando…</div></div>
+
+    <div class="panel" id="panel-proveedores">
+      <div id="listaProveedores">Cargando…</div>
+    </div>
+
+    <div class="panel" id="panel-clientes">
+      <div id="listaClientes">Cargando…</div>
+    </div>
+
+    <div class="panel" id="panel-configuracion">
+      <div class="info-box">
+        <b>Sobre "modificar usuarios":</b> los logins del panel (vos y cualquier otro operador) se manejan
+        desde <b>Supabase → Authentication → Users</b>, no desde acá. Es intencional: crear o editar usuarios
+        requiere una clave (service_role) que nunca debe exponerse en una página web pública — cualquiera
+        que abriera el código del navegador podría usarla para borrar toda la base de datos. Si más adelante
+        querés un botón dentro del panel para esto, se puede construir con una función de servidor separada
+        (Netlify Function) que guarde esa clave de forma segura — avisame cuando lo necesites.
+      </div>
+      <h3 style="margin-bottom:14px;">Configuración de cobro por defecto</h3>
+      <div class="config-card">
+        <label>Monto por defecto (Bs)</label>
+        <input id="cfgMonto" type="number" step="0.5" min="0">
+        <label>Quién paga por defecto</label>
+        <select id="cfgResponsable">
+          <option value="proveedor">El proveedor</option>
+          <option value="cliente">El cliente</option>
+          <option value="ambos">Ambos (montos definidos por el operador)</option>
+          <option value="a_eleccion">A elección — se define caso por caso</option>
+        </select>
+        <button class="act primary" id="guardarConfigBtn" style="margin-top:18px;">Guardar configuración</button>
+        <p id="configMsg" style="margin-top:10px; font-size:0.85rem;"></p>
+      </div>
+    </div>
   </main>
+</div>
+
+<!-- Modal genérico de edición -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modalContent"></div>
 </div>
 
 <script src="supabase-config.js"></script>
 <script>
   let proveedoresCache = [];
+  let configuracion = { cobro_monto_default: 10, cobro_responsable_default: 'proveedor' };
 
   // ---------- AUTH ----------
   supabaseClient.auth.onAuthStateChange((event, session)=>{
     if(session){ document.getElementById('loginBox').style.display='none'; document.getElementById('appWrap').style.display='block'; init(); }
     else{ document.getElementById('loginBox').style.display='block'; document.getElementById('appWrap').style.display='none'; }
   });
-
   document.getElementById('loginBtn').addEventListener('click', async ()=>{
     const { error } = await supabaseClient.auth.signInWithPassword({
       email: document.getElementById('loginEmail').value,
@@ -95,15 +161,30 @@
     t.classList.add('active');
     document.getElementById('panel-'+t.dataset.tab).classList.add('active');
     if(t.dataset.tab === 'proveedores') cargarProveedores();
+    if(t.dataset.tab === 'clientes') cargarClientes();
+    if(t.dataset.tab === 'configuracion') cargarConfiguracion();
   }));
 
-  function init(){ cargarSolicitudes(); cargarProveedoresCache(); }
+  function init(){ cargarSolicitudes(); cargarProveedoresCache(); cargarConfiguracion(true); }
 
-  // ---------- SOLICITUDES ----------
+  // ---------- MODAL genérico ----------
+  function abrirModal(html){
+    document.getElementById('modalContent').innerHTML = html;
+    document.getElementById('modalOverlay').classList.add('open');
+  }
+  function cerrarModal(){ document.getElementById('modalOverlay').classList.remove('open'); }
+  document.getElementById('modalOverlay').addEventListener('click', (e)=>{ if(e.target.id === 'modalOverlay') cerrarModal(); });
+
+  // ============================================================
+  // SOLICITUDES
+  // ============================================================
   async function cargarSolicitudes(){
     const { data, error } = await supabaseClient
       .from('solicitudes')
-      .select('*, clientes(nombre, whatsapp, direccion_exacta), categorias(nombre), zonas(nombre), solicitud_contactos(id, proveedor_id, respuesta, fecha_envio, fecha_respuesta, proveedores(nombre_razon_social, whatsapp))')
+      .select(`*, clientes(nombre, whatsapp, direccion_exacta),
+                categorias(nombre), zonas(nombre),
+                solicitud_contactos(id, proveedor_id, respuesta, fecha_envio, fecha_respuesta, proveedores(nombre_razon_social, whatsapp)),
+                cobros(id, monto_proveedor, monto_cliente, responsable, pagado, nota)`)
       .order('created_at', { ascending: false });
 
     const box = document.getElementById('listaSolicitudes');
@@ -111,13 +192,15 @@
     if(!data.length){ box.textContent = "No hay solicitudes todavía."; return; }
 
     box.innerHTML = data.map(s => renderSolicitud(s)).join('');
-    // listeners de difusión y respuesta se atan después de renderizar
     data.forEach(s => atarEventos(s));
   }
 
   function renderSolicitud(s){
     const yaContactados = (s.solicitud_contactos || []);
     const candidatos = proveedoresCache.filter(p => !yaContactados.some(c => c.proveedor_id === p.id));
+    const asignada = s.estado === 'aceptada' || s.estado === 'en_ejecucion' || s.estado === 'completada';
+    const cobro = (s.cobros && s.cobros[0]) || null;
+
     return `
       <div class="req-card" data-id="${s.id}">
         <div class="req-head">
@@ -134,12 +217,20 @@
           ${(s.fotos && s.fotos.length) ? `<div class="fotos-row">${s.fotos.map(u=>`<a href="${u}" target="_blank"><img src="${u}" alt="foto"></a>`).join('')}</div>` : ''}
         </div>
 
-        ${s.estado === 'pendiente' || s.estado === 'difundida' ? `
+        ${!asignada ? `
+        <div class="req-actions" style="margin-top:14px;">
+          <select class="inline" data-role="asignacionDirecta">
+            <option value="">Asignar directamente a…</option>
+            ${proveedoresCache.map(p=>`<option value="${p.id}">${p.nombre_razon_social}</option>`).join('')}
+          </select>
+          <button class="act primary" data-action="asignarDirecto">Asignar →</button>
+        </div>
+
         <div class="prov-select" data-role="candidatos">
           ${candidatos.map(p => `<div class="prov-chip" data-prov="${p.id}">${p.nombre_razon_social}</div>`).join('') || '<em>No hay más proveedores candidatos para difundir</em>'}
         </div>
         <div class="req-actions">
-          <button class="act primary" data-action="difundir">Enviar a seleccionados →</button>
+          <button class="act ghost" data-action="difundir">O enviar a varios seleccionados →</button>
         </div>` : ''}
 
         ${yaContactados.length ? `
@@ -155,6 +246,41 @@
                 ` : `<b>${c.respuesta}</b>`}
               </span>
             </div>`).join('')}
+        </div>` : ''}
+
+        ${asignada ? `
+        <div class="cobro-box" data-role="cobro">
+          <b style="font-size:0.85rem; color:var(--teal);">Cobro de esta solicitud</b>
+          <div class="cobro-grid">
+            <div>
+              <label>¿Quién paga?</label>
+              <select class="inline full" data-field="responsable" style="width:100%;">
+                <option value="proveedor" ${cobro?.responsable==='proveedor'?'selected':''}>El proveedor</option>
+                <option value="cliente" ${cobro?.responsable==='cliente'?'selected':''}>El cliente</option>
+                <option value="ambos" ${cobro?.responsable==='ambos'?'selected':''}>Ambos</option>
+                <option value="a_eleccion" ${cobro?.responsable==='a_eleccion'?'selected':''}>A elección / a definir</option>
+              </select>
+            </div>
+            <div></div>
+            <div>
+              <label>Monto proveedor (Bs)</label>
+              <input class="inline" type="number" step="0.5" data-field="monto_proveedor" value="${cobro?.monto_proveedor ?? configuracion.cobro_monto_default}">
+            </div>
+            <div>
+              <label>Monto cliente (Bs)</label>
+              <input class="inline" type="number" step="0.5" data-field="monto_cliente" value="${cobro?.monto_cliente ?? 0}">
+            </div>
+            <div class="full">
+              <label>Nota (opcional)</label>
+              <input class="inline" type="text" data-field="nota" value="${cobro?.nota ?? ''}" placeholder="Ej. acordado por WhatsApp">
+            </div>
+          </div>
+          <div class="check-row">
+            <input type="checkbox" data-field="pagado" ${cobro?.pagado ? 'checked':''}> <span>Ya se cobró</span>
+          </div>
+          <div class="req-actions">
+            <button class="act primary" data-action="guardarCobro">Guardar cobro</button>
+          </div>
         </div>` : ''}
       </div>`;
   }
@@ -177,19 +303,20 @@
       cargarSolicitudes();
     });
 
+    const asignarBtn = card.querySelector('[data-action="asignarDirecto"]');
+    if(asignarBtn) asignarBtn.addEventListener('click', async ()=>{
+      const provId = card.querySelector('[data-role="asignacionDirecta"]').value;
+      if(!provId){ alert("Elegí un proveedor para asignar directamente."); return; }
+      await asignarProveedor(s.id, provId);
+    });
+
     card.querySelectorAll('[data-action="aceptar"]').forEach(btn=>{
       btn.addEventListener('click', async ()=>{
         const contactoId = btn.dataset.contacto;
         const provId = btn.dataset.prov;
-        // 1. marcar este contacto como aceptado
         await supabaseClient.from('solicitud_contactos').update({ respuesta: 'aceptado', fecha_respuesta: new Date().toISOString() }).eq('id', contactoId);
-        // 2. marcar los demás contactos de la misma solicitud como sin_respuesta (ya fue tomado)
         await supabaseClient.from('solicitud_contactos').update({ respuesta: 'sin_respuesta' }).eq('solicitud_id', s.id).neq('id', contactoId).eq('respuesta','pendiente');
-        // 3. asignar proveedor y actualizar estado de la solicitud
-        await supabaseClient.from('solicitudes').update({ estado: 'aceptada', proveedor_asignado_id: provId, fecha_aceptacion: new Date().toISOString() }).eq('id', s.id);
-        // 4. generar el cobro de Bs 10 — se dispara SOLO al aceptar (Cap. 4-5, Términos de Uso Sección 5.4)
-        await supabaseClient.from('cobros').insert({ proveedor_id: provId, solicitud_id: s.id, monto_bs: 10.00 });
-        cargarSolicitudes();
+        await asignarProveedor(s.id, provId);
       });
     });
     card.querySelectorAll('[data-action="rechazar"]').forEach(btn=>{
@@ -198,9 +325,46 @@
         cargarSolicitudes();
       });
     });
+
+    const guardarCobroBtn = card.querySelector('[data-action="guardarCobro"]');
+    if(guardarCobroBtn) guardarCobroBtn.addEventListener('click', async ()=>{
+      const cobroBox = card.querySelector('[data-role="cobro"]');
+      const payload = {
+        solicitud_id: s.id,
+        proveedor_id: s.proveedor_asignado_id,
+        responsable: cobroBox.querySelector('[data-field="responsable"]').value,
+        monto_proveedor: parseFloat(cobroBox.querySelector('[data-field="monto_proveedor"]').value) || 0,
+        monto_cliente: parseFloat(cobroBox.querySelector('[data-field="monto_cliente"]').value) || 0,
+        nota: cobroBox.querySelector('[data-field="nota"]').value,
+        pagado: cobroBox.querySelector('[data-field="pagado"]').checked
+      };
+      const { error } = await supabaseClient.from('cobros').upsert(payload, { onConflict: 'solicitud_id' });
+      if(error){ alert("No se pudo guardar el cobro: " + error.message); return; }
+      cargarSolicitudes();
+    });
   }
 
-  // ---------- PROVEEDORES ----------
+  // Asigna un proveedor a una solicitud (desde difusión-aceptar o asignación directa)
+  // y crea el registro de cobro inicial con los valores por defecto de Configuración.
+  async function asignarProveedor(solicitudId, proveedorId){
+    await supabaseClient.from('solicitudes').update({
+      estado: 'aceptada', proveedor_asignado_id: proveedorId, fecha_aceptacion: new Date().toISOString()
+    }).eq('id', solicitudId);
+
+    await supabaseClient.from('cobros').upsert({
+      solicitud_id: solicitudId,
+      proveedor_id: proveedorId,
+      responsable: configuracion.cobro_responsable_default,
+      monto_proveedor: configuracion.cobro_responsable_default === 'cliente' ? 0 : configuracion.cobro_monto_default,
+      monto_cliente: configuracion.cobro_responsable_default === 'cliente' ? configuracion.cobro_monto_default : 0
+    }, { onConflict: 'solicitud_id' });
+
+    cargarSolicitudes();
+  }
+
+  // ============================================================
+  // PROVEEDORES (con edición completa)
+  // ============================================================
   async function cargarProveedoresCache(){
     const { data } = await supabaseClient.from('proveedores').select('id, nombre_razon_social').eq('activo', true);
     proveedoresCache = data || [];
@@ -212,7 +376,7 @@
     if(error){ box.textContent = "Error: " + error.message; return; }
     box.innerHTML = `
       <table>
-        <tr><th>Nombre</th><th>WhatsApp</th><th>Categorías</th><th>Zonas</th><th>Cobro pref.</th><th>Trabajos</th></tr>
+        <tr><th>Nombre</th><th>WhatsApp</th><th>Categorías</th><th>Zonas</th><th>Cobro pref.</th><th>Estado</th><th></th></tr>
         ${data.map(p => `
           <tr>
             <td>${p.nombre_razon_social}</td>
@@ -220,10 +384,135 @@
             <td>${(p.proveedor_categorias||[]).map(c=>c.categorias?.nombre).join(', ')}</td>
             <td>${(p.proveedor_zonas||[]).map(z=>z.zonas?.nombre).join(', ')}</td>
             <td>${p.metodo_cobro || '—'}</td>
-            <td>${(p.fotos_trabajos && p.fotos_trabajos.length) ? `<div class="fotos-row">${p.fotos_trabajos.map(u=>`<a href="${u}" target="_blank"><img src="${u}" alt="trabajo"></a>`).join('')}</div>` : '—'}</td>
+            <td><span class="badge ${p.activo ? '' : 'off'}">${p.activo ? 'Activo' : 'Inactivo'}</span></td>
+            <td><button class="act" data-editar-prov="${p.id}">Editar</button></td>
           </tr>`).join('')}
       </table>`;
+    box.querySelectorAll('[data-editar-prov]').forEach(btn=>{
+      const prov = data.find(p => p.id === btn.dataset.editarProv);
+      btn.addEventListener('click', ()=> abrirModalProveedor(prov));
+    });
   }
+
+  function abrirModalProveedor(p){
+    abrirModal(`
+      <h3>Editar proveedor</h3>
+      <label>Nombre / razón social</label><input id="mNombre" value="${p.nombre_razon_social || ''}">
+      <label>WhatsApp</label><input id="mWhatsapp" value="${p.whatsapp || ''}">
+      <label>Años de experiencia</label><input id="mExperiencia" type="number" value="${p.anos_experiencia || ''}">
+      <label>Modo de trabajo</label>
+      <select id="mModo">
+        ${['Solo','Con 1-2 ayudantes','Con equipo de 3 o más'].map(v=>`<option value="${v}" ${p.modo_trabajo===v?'selected':''}>${v}</option>`).join('')}
+      </select>
+      <label>Situación tributaria</label>
+      <select id="mTributaria">
+        ${['Régimen Simplificado (RTS)','Régimen General','No tengo registro tributario actualmente','Prefiero no decir'].map(v=>`<option value="${v}" ${p.situacion_tributaria===v?'selected':''}>${v}</option>`).join('')}
+      </select>
+      <label>Método de cobro</label>
+      <select id="mCobro">
+        ${['QR Simple (banco)','Tigo Money','Ambos'].map(v=>`<option value="${v}" ${p.metodo_cobro===v?'selected':''}>${v}</option>`).join('')}
+      </select>
+      <label>Disponibilidad</label><input id="mDisponibilidad" value="${p.disponibilidad || ''}">
+      <label style="display:flex; align-items:center; gap:8px; margin-top:14px;">
+        <input type="checkbox" id="mActivo" ${p.activo ? 'checked':''} style="width:auto;"> Proveedor activo
+      </label>
+      <div class="modal-actions">
+        <button class="act" onclick="cerrarModal()">Cancelar</button>
+        <button class="act primary" id="guardarProvBtn">Guardar</button>
+      </div>
+    `);
+    document.getElementById('guardarProvBtn').addEventListener('click', async ()=>{
+      const { error } = await supabaseClient.from('proveedores').update({
+        nombre_razon_social: document.getElementById('mNombre').value,
+        whatsapp: document.getElementById('mWhatsapp').value,
+        anos_experiencia: parseInt(document.getElementById('mExperiencia').value) || null,
+        modo_trabajo: document.getElementById('mModo').value,
+        situacion_tributaria: document.getElementById('mTributaria').value,
+        metodo_cobro: document.getElementById('mCobro').value,
+        disponibilidad: document.getElementById('mDisponibilidad').value,
+        activo: document.getElementById('mActivo').checked
+      }).eq('id', p.id);
+      if(error){ alert("No se pudo guardar: " + error.message); return; }
+      cerrarModal();
+      cargarProveedores();
+      cargarProveedoresCache();
+    });
+  }
+
+  // ============================================================
+  // CLIENTES (nuevo — listar y editar)
+  // ============================================================
+  async function cargarClientes(){
+    const { data, error } = await supabaseClient.from('clientes').select('*, zonas(nombre)').order('created_at', {ascending:false});
+    const box = document.getElementById('listaClientes');
+    if(error){ box.textContent = "Error: " + error.message; return; }
+    box.innerHTML = `
+      <table>
+        <tr><th>Nombre</th><th>WhatsApp</th><th>Zona</th><th>Dirección</th><th></th></tr>
+        ${data.map(c => `
+          <tr>
+            <td>${c.nombre}</td>
+            <td>${c.whatsapp}</td>
+            <td>${c.zonas?.nombre || '—'}</td>
+            <td>${c.direccion_exacta || '—'}</td>
+            <td><button class="act" data-editar-cli="${c.id}">Editar</button></td>
+          </tr>`).join('')}
+      </table>`;
+    box.querySelectorAll('[data-editar-cli]').forEach(btn=>{
+      const cli = data.find(c => c.id === btn.dataset.editarCli);
+      btn.addEventListener('click', ()=> abrirModalCliente(cli));
+    });
+  }
+
+  function abrirModalCliente(c){
+    abrirModal(`
+      <h3>Editar cliente</h3>
+      <label>Nombre completo</label><input id="mcNombre" value="${c.nombre || ''}">
+      <label>WhatsApp</label><input id="mcWhatsapp" value="${c.whatsapp || ''}">
+      <label>Dirección exacta</label><input id="mcDireccion" value="${c.direccion_exacta || ''}">
+      <div class="modal-actions">
+        <button class="act" onclick="cerrarModal()">Cancelar</button>
+        <button class="act primary" id="guardarCliBtn">Guardar</button>
+      </div>
+    `);
+    document.getElementById('guardarCliBtn').addEventListener('click', async ()=>{
+      const { error } = await supabaseClient.from('clientes').update({
+        nombre: document.getElementById('mcNombre').value,
+        whatsapp: document.getElementById('mcWhatsapp').value,
+        direccion_exacta: document.getElementById('mcDireccion').value
+      }).eq('id', c.id);
+      if(error){ alert("No se pudo guardar: " + error.message); return; }
+      cerrarModal();
+      cargarClientes();
+    });
+  }
+
+  // ============================================================
+  // CONFIGURACIÓN (nuevo)
+  // ============================================================
+  async function cargarConfiguracion(silencioso){
+    const { data, error } = await supabaseClient.from('configuracion').select('*').eq('id', 1).single();
+    if(!error && data){
+      configuracion = data;
+      if(!silencioso){
+        document.getElementById('cfgMonto').value = data.cobro_monto_default;
+        document.getElementById('cfgResponsable').value = data.cobro_responsable_default;
+      }
+    }
+  }
+
+  document.getElementById('guardarConfigBtn').addEventListener('click', async ()=>{
+    const payload = {
+      id: 1,
+      cobro_monto_default: parseFloat(document.getElementById('cfgMonto').value) || 10,
+      cobro_responsable_default: document.getElementById('cfgResponsable').value
+    };
+    const { error } = await supabaseClient.from('configuracion').upsert(payload, { onConflict: 'id' });
+    const msg = document.getElementById('configMsg');
+    if(error){ msg.style.color = 'var(--rust)'; msg.textContent = "Error: " + error.message; return; }
+    configuracion = payload;
+    msg.style.color = 'var(--ok)'; msg.textContent = "✓ Guardado. Se aplicará a los próximos cobros generados automáticamente.";
+  });
 </script>
 </body>
 </html>
