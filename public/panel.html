@@ -32,19 +32,7 @@
   .prov-select{margin-top:10px; display:flex; flex-wrap:wrap; gap:6px;}
   .prov-chip{border:2px solid var(--teal); color:var(--teal); border-radius:100px; padding:6px 12px; font-size:0.8rem; cursor:pointer;}
   .prov-chip.selected{background:var(--teal); color:#fff;}
-  .prov-chip.zona-match{border-color:var(--rust); color:var(--rust); font-weight:700;}
-  .prov-chip.zona-match.selected{background:var(--rust); color:#fff;}
-  .zona-tag{font-size:0.68rem; font-weight:700; opacity:0.85;}
-  .prov-group-label{width:100%; font-size:0.72rem; text-transform:uppercase; font-weight:700; color:var(--muted,#777); margin-top:6px;}
   .contacto-row{display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-top:1px dashed var(--line); font-size:0.85rem;}
-  .contacto-block{padding:6px 0; border-top:1px dashed var(--line);}
-  .locked{margin-top:6px; padding:10px; border:2px dashed var(--rust); border-radius:10px; background:#fff6f2; font-size:0.83rem; color:var(--ink);}
-  .datos-ok{margin-top:6px; padding:10px; border:2px solid var(--ok,#2e7d32); border-radius:10px; background:#f1f9f1; font-size:0.85rem;}
-  .gate-cliente{margin-top:12px; padding-top:8px; border-top:2px solid var(--line);}
-  .qr-box{margin:8px 0;}
-  .qr-box summary{cursor:pointer; font-weight:700; color:var(--rust); font-size:0.82rem;}
-  .qr-box img{display:block; width:200px; max-width:100%; margin-top:8px; border:2px solid var(--ink); border-radius:10px;}
-  .qr-box .qr-cta{font-size:0.75rem; margin-top:4px; color:var(--muted,#666);}
   .fotos-row{display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;}
   .fotos-row a img{width:64px; height:64px; object-fit:cover; border-radius:8px; border:2px solid var(--ink); display:block;}
   table{width:100%; border-collapse:collapse; margin-top:12px;}
@@ -109,13 +97,13 @@
     if(t.dataset.tab === 'proveedores') cargarProveedores();
   }));
 
-  async function init(){ await cargarProveedoresCache(); cargarSolicitudes(); }
+  function init(){ cargarSolicitudes(); cargarProveedoresCache(); }
 
   // ---------- SOLICITUDES ----------
   async function cargarSolicitudes(){
     const { data, error } = await supabaseClient
       .from('solicitudes')
-      .select('*, clientes(nombre, whatsapp, direccion_exacta), categorias(nombre), zonas(nombre), solicitud_contactos(id, proveedor_id, respuesta, fecha_envio, fecha_respuesta, pago_confirmado, fecha_pago, proveedores(nombre_razon_social, whatsapp))')
+      .select('*, clientes(nombre, whatsapp, direccion_exacta), categorias(nombre), zonas(nombre), solicitud_contactos(id, proveedor_id, respuesta, fecha_envio, fecha_respuesta, proveedores(nombre_razon_social, whatsapp))')
       .order('created_at', { ascending: false });
 
     const box = document.getElementById('listaSolicitudes');
@@ -129,13 +117,7 @@
 
   function renderSolicitud(s){
     const yaContactados = (s.solicitud_contactos || []);
-    const disponibles = proveedoresCache.filter(p => !yaContactados.some(c => c.proveedor_id === p.id));
-    // Solo proveedores de la categoría de la solicitud; los que además coinciden en zona van primero (resaltados).
-    const candidatos = disponibles
-      .filter(p => (p.categorias || []).includes(s.categoria_id))
-      .sort((a, b) => (( (b.zonas||[]).includes(s.zona_id) ? 1 : 0) - ((a.zonas||[]).includes(s.zona_id) ? 1 : 0)));
-    const proveedorAsignado = yaContactados.find(c => c.proveedor_id === s.proveedor_asignado_id);
-    const qrHtml = `<details class="qr-box"><summary>Ver / enviar QR de pago (Bs 9)</summary><img src="qr-pago.jpg" alt="QR de pago Bs 9"><div class="qr-cta">Banco Unión · Bs 9 · Glosa: Servicios · Dest: Carlos Menacho</div></details>`;
+    const candidatos = proveedoresCache.filter(p => !yaContactados.some(c => c.proveedor_id === p.id));
     return `
       <div class="req-card" data-id="${s.id}">
         <div class="req-head">
@@ -147,14 +129,14 @@
           <div style="font-size:0.8rem;">${new Date(s.created_at).toLocaleString('es-BO')}</div>
         </div>
         <div class="req-body">
-          <div><b>Cliente:</b> ${s.clientes?.nombre}</div>
+          <div><b>Cliente:</b> ${s.clientes?.nombre} — ${s.clientes?.whatsapp} — ${s.clientes?.direccion_exacta || 'sin dirección'}</div>
           <div style="margin-top:6px;">${s.descripcion}</div>
           ${(s.fotos && s.fotos.length) ? `<div class="fotos-row">${s.fotos.map(u=>`<a href="${u}" target="_blank"><img src="${u}" alt="foto"></a>`).join('')}</div>` : ''}
         </div>
 
         ${s.estado === 'pendiente' || s.estado === 'difundida' ? `
         <div class="prov-select" data-role="candidatos">
-          ${candidatos.map(p => { const zonaOk = (p.zonas||[]).includes(s.zona_id); return `<div class="prov-chip${zonaOk ? ' zona-match' : ''}" data-prov="${p.id}" title="${zonaOk ? 'Coincide en categoría y zona' : 'Coincide en categoría (otra zona)'}">${p.nombre_razon_social}${zonaOk ? ' <span class="zona-tag">· zona ✓</span>' : ''}</div>`; }).join('') || '<em>No hay proveedores de esta categoría para difundir todavía</em>'}
+          ${candidatos.map(p => `<div class="prov-chip" data-prov="${p.id}">${p.nombre_razon_social}</div>`).join('') || '<em>No hay más proveedores candidatos para difundir</em>'}
         </div>
         <div class="req-actions">
           <button class="act primary" data-action="difundir">Enviar a seleccionados →</button>
@@ -164,50 +146,15 @@
         <div style="margin-top:10px;">
           <b style="font-size:0.8rem;">Contactados:</b>
           ${yaContactados.map(c => `
-            <div class="contacto-block">
-              <div class="contacto-row">
-                <span><b>${c.proveedores?.nombre_razon_social}</b></span>
-                <span>${c.respuesta !== 'pendiente' ? `<b>${c.respuesta}</b>` : ''}</span>
-              </div>
-              ${c.pago_confirmado ? `
-                <div class="datos-ok">
-                  <div>✓ Proveedor pagó Bs 9. Datos del cliente para compartir:</div>
-                  <div><b>WhatsApp:</b> ${s.clientes?.whatsapp} · <b>Dirección:</b> ${s.clientes?.direccion_exacta || 'sin dirección'}</div>
-                </div>
+            <div class="contacto-row">
+              <span>${c.proveedores?.nombre_razon_social} (${c.proveedores?.whatsapp})</span>
+              <span>
                 ${c.respuesta === 'pendiente' ? `
-                  <div class="req-actions">
-                    <button class="act ok" data-action="aceptar" data-contacto="${c.id}" data-prov="${c.proveedor_id}">Aceptó el trabajo</button>
-                    <button class="act" data-action="rechazar" data-contacto="${c.id}">Rechazó</button>
-                  </div>` : ''}
-              ` : `
-                <div class="locked">
-                  🔒 Datos del cliente bloqueados. El proveedor debe pagar <b>Bs 9</b> para recibirlos.
-                  ${qrHtml}
-                  <div class="req-actions">
-                    <button class="act primary" data-action="pago-prov" data-contacto="${c.id}" data-prov="${c.proveedor_id}">Confirmar pago del proveedor (Bs 9)</button>
-                  </div>
-                </div>
-              `}
+                  <button class="act ok" data-action="aceptar" data-contacto="${c.id}" data-prov="${c.proveedor_id}">Aceptó</button>
+                  <button class="act" data-action="rechazar" data-contacto="${c.id}">Rechazó</button>
+                ` : `<b>${c.respuesta}</b>`}
+              </span>
             </div>`).join('')}
-        </div>` : ''}
-
-        ${s.estado === 'aceptada' && proveedorAsignado ? `
-        <div class="gate-cliente">
-          <b style="font-size:0.8rem;">Compartir datos del proveedor con el cliente:</b>
-          ${s.cliente_pago ? `
-            <div class="datos-ok">
-              <div>✓ Cliente pagó Bs 9. Datos del proveedor para compartir:</div>
-              <div><b>${proveedorAsignado.proveedores?.nombre_razon_social}</b> · <b>WhatsApp:</b> ${proveedorAsignado.proveedores?.whatsapp}</div>
-            </div>
-          ` : `
-            <div class="locked">
-              🔒 Datos del proveedor bloqueados. El cliente debe pagar <b>Bs 9</b> para recibirlos.
-              ${qrHtml}
-              <div class="req-actions">
-                <button class="act primary" data-action="pago-cliente" data-prov="${proveedorAsignado.proveedor_id}">Confirmar pago del cliente (Bs 9)</button>
-              </div>
-            </div>
-          `}
         </div>` : ''}
       </div>`;
   }
@@ -230,29 +177,6 @@
       cargarSolicitudes();
     });
 
-    // Confirmar pago del PROVEEDOR (Bs 9) → desbloquea los datos del cliente para ese proveedor
-    card.querySelectorAll('[data-action="pago-prov"]').forEach(btn=>{
-      btn.addEventListener('click', async ()=>{
-        if(!confirm('¿Confirmás que el proveedor pagó Bs 9? Se desbloquearán los datos del cliente.')) return;
-        const contactoId = btn.dataset.contacto;
-        const provId = btn.dataset.prov;
-        await supabaseClient.from('solicitud_contactos').update({ pago_confirmado: true, fecha_pago: new Date().toISOString() }).eq('id', contactoId);
-        await supabaseClient.from('cobros').insert({ proveedor_id: provId, solicitud_id: s.id, monto_bs: 9.00, concepto: 'proveedor', pagado: true });
-        cargarSolicitudes();
-      });
-    });
-
-    // Confirmar pago del CLIENTE (Bs 9) → desbloquea los datos del proveedor asignado
-    card.querySelectorAll('[data-action="pago-cliente"]').forEach(btn=>{
-      btn.addEventListener('click', async ()=>{
-        if(!confirm('¿Confirmás que el cliente pagó Bs 9? Se desbloquearán los datos del proveedor.')) return;
-        const provId = btn.dataset.prov;
-        await supabaseClient.from('solicitudes').update({ cliente_pago: true, fecha_pago_cliente: new Date().toISOString() }).eq('id', s.id);
-        await supabaseClient.from('cobros').insert({ proveedor_id: provId, solicitud_id: s.id, monto_bs: 9.00, concepto: 'cliente', pagado: true });
-        cargarSolicitudes();
-      });
-    });
-
     card.querySelectorAll('[data-action="aceptar"]').forEach(btn=>{
       btn.addEventListener('click', async ()=>{
         const contactoId = btn.dataset.contacto;
@@ -263,6 +187,8 @@
         await supabaseClient.from('solicitud_contactos').update({ respuesta: 'sin_respuesta' }).eq('solicitud_id', s.id).neq('id', contactoId).eq('respuesta','pendiente');
         // 3. asignar proveedor y actualizar estado de la solicitud
         await supabaseClient.from('solicitudes').update({ estado: 'aceptada', proveedor_asignado_id: provId, fecha_aceptacion: new Date().toISOString() }).eq('id', s.id);
+        // 4. generar el cobro de Bs 10 — se dispara SOLO al aceptar (Cap. 4-5, Términos de Uso Sección 5.4)
+        await supabaseClient.from('cobros').insert({ proveedor_id: provId, solicitud_id: s.id, monto_bs: 10.00 });
         cargarSolicitudes();
       });
     });
@@ -276,16 +202,8 @@
 
   // ---------- PROVEEDORES ----------
   async function cargarProveedoresCache(){
-    const { data } = await supabaseClient
-      .from('proveedores')
-      .select('id, nombre_razon_social, proveedor_categorias(categoria_id), proveedor_zonas(zona_id)')
-      .eq('activo', true);
-    proveedoresCache = (data || []).map(p => ({
-      id: p.id,
-      nombre_razon_social: p.nombre_razon_social,
-      categorias: (p.proveedor_categorias || []).map(c => c.categoria_id),
-      zonas: (p.proveedor_zonas || []).map(z => z.zona_id)
-    }));
+    const { data } = await supabaseClient.from('proveedores').select('id, nombre_razon_social').eq('activo', true);
+    proveedoresCache = data || [];
   }
 
   async function cargarProveedores(){
