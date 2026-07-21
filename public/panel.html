@@ -4,302 +4,360 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Panel de Operador | ServiExpress</title>
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Supabase JS -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-gray-50 text-gray-800">
+<body class="bg-gray-50 text-gray-800 font-sans">
 
-  <!-- Login Screen -->
+  <!-- ==================== PANTALLA DE LOGIN ==================== -->
   <div id="login-screen" class="fixed inset-0 bg-blue-900 flex items-center justify-center z-50">
-    <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
-      <h2 class="text-2xl font-bold text-center text-blue-900 mb-6">Acceso Operador ServiExpress</h2>
-      <input type="email" id="login-email" placeholder="Correo electrónico" class="w-full p-3 border rounded mb-4">
-      <input type="password" id="login-password" placeholder="Contraseña" class="w-full p-3 border rounded mb-6">
-      <button onclick="login()" class="w-full bg-blue-600 text-white p-3 rounded font-bold hover:bg-blue-700">Ingresar</button>
-      <p id="login-error" class="text-red-600 text-sm mt-3 text-center hidden"></p>
+    <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md mx-4">
+      <h2 class="text-2xl font-bold text-center text-blue-900 mb-2">ServiExpress</h2>
+      <p class="text-center text-gray-500 mb-6 text-sm">Acceso exclusivo para Operadores</p>
+      
+      <input type="email" id="login-email" placeholder="Correo electrónico" class="w-full p-3 border border-gray-300 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500">
+      <input type="password" id="login-password" placeholder="Contraseña" class="w-full p-3 border border-gray-300 rounded mb-6 focus:outline-none focus:ring-2 focus:ring-blue-500">
+      
+      <button onclick="login()" class="w-full bg-blue-600 text-white p-3 rounded font-bold hover:bg-blue-700 transition duration-200">Ingresar al Panel</button>
+      <p id="login-error" class="text-red-600 text-sm mt-3 text-center hidden bg-red-50 p-2 rounded"></p>
     </div>
   </div>
 
-  <!-- Main App (Hidden until login) -->
+  <!-- ==================== APLICACIÓN PRINCIPAL ==================== -->
   <div id="main-app" class="hidden min-h-screen flex flex-col">
+    
     <!-- Header -->
-    <header class="bg-blue-900 text-white p-4 shadow-md flex justify-between items-center">
-      <h1 class="text-xl font-bold"><i class="fas fa-tools mr-2"></i>ServiExpress - Panel de Control</h1>
-      <button onclick="logout()" class="text-sm bg-red-600 px-4 py-2 rounded hover:bg-red-700">Cerrar Sesión</button>
+    <header class="bg-blue-900 text-white p-4 shadow-md flex justify-between items-center sticky top-0 z-40">
+      <div class="flex items-center gap-3">
+        <i class="fas fa-tools text-xl"></i>
+        <h1 class="text-xl font-bold">ServiExpress - Panel de Control</h1>
+      </div>
+      <button onclick="logout()" class="text-sm bg-red-600 px-4 py-2 rounded hover:bg-red-700 transition duration-200 flex items-center gap-2">
+        <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+      </button>
     </header>
 
-    <!-- Navigation Tabs -->
-    <nav class="bg-white shadow flex overflow-x-auto">
-      <button onclick="showTab('dashboard')" class="tab-btn px-6 py-4 font-semibold text-blue-900 border-b-2 border-blue-900" data-tab="dashboard">📊 Dashboard</button>
-      <button onclick="showTab('solicitudes')" class="tab-btn px-6 py-4 font-semibold text-gray-600 hover:text-blue-900" data-tab="solicitudes">📋 Solicitudes</button>
-      <button onclick="showTab('cobros')" class="tab-btn px-6 py-4 font-semibold text-gray-600 hover:text-blue-900" data-tab="cobros">💰 Cobros</button>
-      <button onclick="showTab('proveedores')" class="tab-btn px-6 py-4 font-semibold text-gray-600 hover:text-blue-900" data-tab="proveedores">👷 Proveedores</button>
-      <button onclick="showTab('catalogo')" class="tab-btn px-6 py-4 font-semibold text-gray-600 hover:text-blue-900" data-tab="catalogo">🗂️ Zonas/Categorías</button>
-      <button onclick="showTab('mediaciones')" class="tab-btn px-6 py-4 font-semibold text-gray-600 hover:text-blue-900" data-tab="mediaciones">⚖️ Mediaciones</button>
-      <button onclick="showTab('configuracion')" class="tab-btn px-6 py-4 font-semibold text-gray-600 hover:text-blue-900" data-tab="configuracion">⚙️ Configuración</button>
+    <!-- Navegación por Pestañas -->
+    <nav class="bg-white shadow flex overflow-x-auto border-b border-gray-200">
+      <button onclick="showTab('dashboard')" class="tab-btn px-6 py-4 font-semibold text-blue-900 border-b-2 border-blue-900 whitespace-nowrap" data-tab="dashboard">📊 Dashboard</button>
+      <button onclick="showTab('solicitudes')" class="tab-btn px-6 py-4 font-semibold text-gray-600 hover:text-blue-900 whitespace-nowrap" data-tab="solicitudes">📋 Solicitudes</button>
+      <button onclick="showTab('cobros')" class="tab-btn px-6 py-4 font-semibold text-gray-600 hover:text-blue-900 whitespace-nowrap" data-tab="cobros">💰 Cobros</button>
+      <button onclick="showTab('proveedores')" class="tab-btn px-6 py-4 font-semibold text-gray-600 hover:text-blue-900 whitespace-nowrap" data-tab="proveedores">👷 Proveedores</button>
+      <button onclick="showTab('catalogo')" class="tab-btn px-6 py-4 font-semibold text-gray-600 hover:text-blue-900 whitespace-nowrap" data-tab="catalogo">🗂️ Catálogo</button>
+      <button onclick="showTab('mediaciones')" class="tab-btn px-6 py-4 font-semibold text-gray-600 hover:text-blue-900 whitespace-nowrap" data-tab="mediaciones">⚖️ Mediaciones</button>
+      <button onclick="showTab('configuracion')" class="tab-btn px-6 py-4 font-semibold text-gray-600 hover:text-blue-900 whitespace-nowrap" data-tab="configuracion">⚙️ Configuración</button>
     </nav>
 
-    <!-- Content Area -->
+    <!-- Área de Contenido -->
     <main class="flex-1 p-6 max-w-7xl mx-auto w-full">
       
-      <!-- DASHBOARD -->
+      <!-- TAB: DASHBOARD -->
       <div id="tab-dashboard" class="tab-content">
-        <h2 class="text-2xl font-bold mb-6">Resumen del Día</h2>
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div class="bg-white p-6 rounded-lg shadow border-l-4 border-blue-500">
-            <p class="text-gray-500 text-sm">Solicitudes Hoy</p>
-            <p class="text-3xl font-bold" id="stat-solicitudes-hoy">0</p>
+        <h2 class="text-2xl font-bold mb-6 text-gray-800">Resumen General</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-blue-500">
+            <p class="text-gray-500 text-sm font-medium uppercase">Solicitudes Hoy</p>
+            <p class="text-3xl font-bold text-gray-800 mt-2" id="stat-solicitudes-hoy">0</p>
           </div>
-          <div class="bg-white p-6 rounded-lg shadow border-l-4 border-green-500">
-            <p class="text-gray-500 text-sm">Tasa de Conversión</p>
-            <p class="text-3xl font-bold" id="stat-conversion">0%</p>
+          <div class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-green-500">
+            <p class="text-gray-500 text-sm font-medium uppercase">Tasa de Conversión</p>
+            <p class="text-3xl font-bold text-gray-800 mt-2" id="stat-conversion">0%</p>
           </div>
-          <div class="bg-white p-6 rounded-lg shadow border-l-4 border-yellow-500">
-            <p class="text-gray-500 text-sm">Cobros Pendientes</p>
-            <p class="text-3xl font-bold" id="stat-cobros-pendientes">0</p>
+          <div class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-yellow-500">
+            <p class="text-gray-500 text-sm font-medium uppercase">Cobros Pendientes</p>
+            <p class="text-3xl font-bold text-gray-800 mt-2" id="stat-cobros-pendientes">0</p>
           </div>
-          <div class="bg-white p-6 rounded-lg shadow border-l-4 border-purple-500">
-            <p class="text-gray-500 text-sm">Ingresos Estimados (Bs)</p>
-            <p class="text-3xl font-bold" id="stat-ingresos">0</p>
+          <div class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-purple-500">
+            <p class="text-gray-500 text-sm font-medium uppercase">Ingresos Estimados (Bs)</p>
+            <p class="text-3xl font-bold text-gray-800 mt-2" id="stat-ingresos">0.00</p>
           </div>
         </div>
       </div>
 
-      <!-- SOLICITUDES -->
+      <!-- TAB: SOLICITUDES -->
       <div id="tab-solicitudes" class="tab-content hidden">
-        <h2 class="text-2xl font-bold mb-4">Gestión de Solicitudes</h2>
-        <div class="bg-white rounded-lg shadow overflow-x-auto">
+        <h2 class="text-2xl font-bold mb-4 text-gray-800">Gestión de Solicitudes</h2>
+        <div class="bg-white rounded-lg shadow-sm overflow-x-auto border border-gray-200">
           <table class="w-full text-left border-collapse">
-            <thead class="bg-gray-100 text-gray-700 text-sm uppercase">
+            <thead class="bg-gray-50 text-gray-700 text-xs uppercase tracking-wider">
               <tr>
-                <th class="p-4">Fecha</th>
-                <th class="p-4">Cliente</th>
-                <th class="p-4">Categoría</th>
-                <th class="p-4">Estado</th>
-                <th class="p-4">Acciones</th>
+                <th class="p-4 border-b">Fecha</th>
+                <th class="p-4 border-b">Cliente</th>
+                <th class="p-4 border-b">Categoría</th>
+                <th class="p-4 border-b">Estado</th>
+                <th class="p-4 border-b">Acciones</th>
               </tr>
             </thead>
-            <tbody id="tabla-solicitudes" class="text-sm"></tbody>
+            <tbody id="tabla-solicitudes" class="text-sm divide-y divide-gray-100"></tbody>
           </table>
         </div>
       </div>
 
-      <!-- COBROS -->
+      <!-- TAB: COBROS -->
       <div id="tab-cobros" class="tab-content hidden">
-        <h2 class="text-2xl font-bold mb-4">Gestión de Cobros</h2>
-        <div class="bg-white rounded-lg shadow overflow-x-auto">
+        <h2 class="text-2xl font-bold mb-4 text-gray-800">Gestión de Cobros de Plataforma</h2>
+        <div class="bg-white rounded-lg shadow-sm overflow-x-auto border border-gray-200">
           <table class="w-full text-left border-collapse">
-            <thead class="bg-gray-100 text-gray-700 text-sm uppercase">
+            <thead class="bg-gray-50 text-gray-700 text-xs uppercase tracking-wider">
               <tr>
-                <th class="p-4">Solicitud</th>
-                <th class="p-4">Responsable</th>
-                <th class="p-4">Monto (Bs)</th>
-                <th class="p-4">Estado de Pago</th>
-                <th class="p-4">Acciones</th>
+                <th class="p-4 border-b">Solicitud / Proveedor</th>
+                <th class="p-4 border-b">Responsable del Pago</th>
+                <th class="p-4 border-b">Monto Total (Bs)</th>
+                <th class="p-4 border-b">Estado de Pago</th>
+                <th class="p-4 border-b">Acciones</th>
               </tr>
             </thead>
-            <tbody id="tabla-cobros" class="text-sm"></tbody>
+            <tbody id="tabla-cobros" class="text-sm divide-y divide-gray-100"></tbody>
           </table>
         </div>
       </div>
 
-      <!-- PROVEEDORES -->
+      <!-- TAB: PROVEEDORES -->
       <div id="tab-proveedores" class="tab-content hidden">
-        <h2 class="text-2xl font-bold mb-4">Proveedores</h2>
-        <div class="bg-white rounded-lg shadow overflow-x-auto">
+        <h2 class="text-2xl font-bold mb-4 text-gray-800">Directorio de Proveedores</h2>
+        <div class="bg-white rounded-lg shadow-sm overflow-x-auto border border-gray-200">
           <table class="w-full text-left border-collapse">
-            <thead class="bg-gray-100 text-gray-700 text-sm uppercase">
+            <thead class="bg-gray-50 text-gray-700 text-xs uppercase tracking-wider">
               <tr>
-                <th class="p-4">Nombre</th>
-                <th class="p-4">WhatsApp</th>
-                <th class="p-4">Categorías</th>
-                <th class="p-4">Estado</th>
-                <th class="p-4">Acción</th>
+                <th class="p-4 border-b">Nombre / Razón Social</th>
+                <th class="p-4 border-b">WhatsApp</th>
+                <th class="p-4 border-b">Estado</th>
+                <th class="p-4 border-b">Acción</th>
               </tr>
             </thead>
-            <tbody id="tabla-proveedores" class="text-sm"></tbody>
+            <tbody id="tabla-proveedores" class="text-sm divide-y divide-gray-100"></tbody>
           </table>
         </div>
       </div>
 
-      <!-- CATALOGO -->
+      <!-- TAB: CATÁLOGO -->
       <div id="tab-catalogo" class="tab-content hidden">
+        <h2 class="text-2xl font-bold mb-6 text-gray-800">Administración de Zonas y Categorías</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div class="bg-white p-6 rounded-lg shadow">
-            <h3 class="font-bold text-lg mb-4">Zonas</h3>
-            <ul id="lista-zonas" class="space-y-2 mb-4"></ul>
-            <div class="flex gap-2">
-              <input type="text" id="nueva-zona" placeholder="Nueva zona" class="border p-2 rounded flex-1">
-              <button onclick="agregarZona()" class="bg-blue-600 text-white px-4 py-2 rounded">Agregar</button>
+          <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+            <h3 class="font-bold text-lg mb-4 text-blue-900">Zonas de Cobertura</h3>
+            <ul id="lista-zonas" class="space-y-2 mb-4 max-h-60 overflow-y-auto"></ul>
+            <div class="flex gap-2 mt-4">
+              <input type="text" id="nueva-zona" placeholder="Nombre de la nueva zona" class="border border-gray-300 p-2 rounded flex-1 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <button onclick="agregarZona()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">Agregar</button>
             </div>
           </div>
-          <div class="bg-white p-6 rounded-lg shadow">
-            <h3 class="font-bold text-lg mb-4">Categorías</h3>
-            <ul id="lista-categorias" class="space-y-2 mb-4"></ul>
-            <div class="flex gap-2">
-              <input type="text" id="nueva-categoria" placeholder="Nueva categoría" class="border p-2 rounded flex-1">
-              <button onclick="agregarCategoria()" class="bg-blue-600 text-white px-4 py-2 rounded">Agregar</button>
+          <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+            <h3 class="font-bold text-lg mb-4 text-blue-900">Categorías de Servicio</h3>
+            <ul id="lista-categorias" class="space-y-2 mb-4 max-h-60 overflow-y-auto"></ul>
+            <div class="flex gap-2 mt-4">
+              <input type="text" id="nueva-categoria" placeholder="Nombre de la nueva categoría" class="border border-gray-300 p-2 rounded flex-1 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <button onclick="agregarCategoria()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">Agregar</button>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- MEDIACIONES -->
+      <!-- TAB: MEDIACIONES -->
       <div id="tab-mediaciones" class="tab-content hidden">
-        <h2 class="text-2xl font-bold mb-4">Mediaciones y Disputas</h2>
-        <div class="bg-white rounded-lg shadow p-6">
-          <p class="text-gray-600 mb-4">Gestiona las disputas reportadas por clientes o proveedores.</p>
+        <h2 class="text-2xl font-bold mb-4 text-gray-800">Mediaciones y Disputas</h2>
+        <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+          <p class="text-gray-600 mb-4 text-sm">Gestiona las disputas reportadas por clientes o proveedores. La mediación es a discreción de la plataforma.</p>
           <div id="lista-mediaciones" class="space-y-4"></div>
         </div>
       </div>
 
-      <!-- CONFIGURACION -->
+      <!-- TAB: CONFIGURACIÓN -->
       <div id="tab-configuracion" class="tab-content hidden">
-        <h2 class="text-2xl font-bold mb-4">Configuración de la Plataforma</h2>
-        <div class="bg-white p-6 rounded-lg shadow max-w-md">
-          <label class="block text-sm font-bold mb-2">Monto de Comisión por Contacto (Bs)</label>
-          <input type="number" id="config-monto" step="0.01" class="border p-3 rounded w-full mb-4">
-          <button onclick="guardarConfiguracion()" class="bg-green-600 text-white px-6 py-2 rounded font-bold hover:bg-green-700">Guardar Cambios</button>
+        <h2 class="text-2xl font-bold mb-4 text-gray-800">Configuración de la Plataforma</h2>
+        <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 max-w-md">
+          <label class="block text-sm font-bold mb-2 text-gray-700">Monto de Comisión por Contacto (Bs)</label>
+          <p class="text-xs text-gray-500 mb-3">Este será el valor por defecto que aparecerá al gestionar una nueva solicitud.</p>
+          <input type="number" id="config-monto" step="0.01" class="border border-gray-300 p-3 rounded w-full mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <button onclick="guardarConfiguracion()" class="bg-green-600 text-white px-6 py-2 rounded font-bold hover:bg-green-700 transition w-full">Guardar Cambios</button>
         </div>
       </div>
 
     </main>
   </div>
 
-  <!-- MODAL DE GESTIÓN DE SOLICITUD Y COBRO -->
-  <div id="modal-gestion" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 p-4">
-    <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-      <div class="p-6 border-b flex justify-between items-center">
-        <h3 class="text-xl font-bold">Gestionar Solicitud y Cobro</h3>
-        <button onclick="cerrarModal()" class="text-gray-500 hover:text-red-600 text-2xl">&times;</button>
+  <!-- ==================== MODAL DE GESTIÓN ==================== -->
+  <div id="modal-gestion" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-lg shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+      <div class="p-6 border-b border-gray-200 flex justify-between items-center bg-gray-50 rounded-t-lg">
+        <h3 class="text-xl font-bold text-gray-800">Gestionar Solicitud y Cobro</h3>
+        <button onclick="cerrarModal()" class="text-gray-500 hover:text-red-600 text-2xl transition">&times;</button>
       </div>
+      
       <div class="p-6 space-y-6">
         <input type="hidden" id="modal-solicitud-id">
         <input type="hidden" id="modal-proveedor-id">
         
-        <!-- Datos Resumen -->
-        <div class="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded">
+        <!-- Resumen de la Solicitud -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-blue-50 p-4 rounded-lg border border-blue-100">
           <div>
-            <p class="text-xs text-gray-500 uppercase">Cliente</p>
-            <p class="font-bold" id="modal-cliente-nombre">-</p>
-            <p class="text-sm" id="modal-cliente-ws">-</p>
+            <p class="text-xs text-blue-800 uppercase font-bold">Cliente</p>
+            <p class="font-bold text-gray-800" id="modal-cliente-nombre">-</p>
+            <p class="text-sm text-gray-600" id="modal-cliente-ws">-</p>
           </div>
           <div>
-            <p class="text-xs text-gray-500 uppercase">Proveedor Asignado</p>
-            <p class="font-bold" id="modal-proveedor-nombre">-</p>
-            <p class="text-sm" id="modal-proveedor-ws">-</p>
+            <p class="text-xs text-blue-800 uppercase font-bold">Proveedor Asignado</p>
+            <p class="font-bold text-gray-800" id="modal-proveedor-nombre">-</p>
+            <p class="text-sm text-gray-600" id="modal-proveedor-ws">-</p>
           </div>
         </div>
 
         <!-- Sección de Cobro Flexible -->
-        <div class="border p-4 rounded-lg bg-blue-50">
-          <h4 class="font-bold text-blue-900 mb-3"><i class="fas fa-money-bill-wave mr-2"></i>Comisión de Plataforma</h4>
+        <div class="border border-gray-200 p-4 rounded-lg bg-white">
+          <h4 class="font-bold text-blue-900 mb-4 flex items-center gap-2">
+            <i class="fas fa-money-bill-wave"></i> Comisión de Plataforma
+          </h4>
+          
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
-              <label class="block text-sm font-semibold mb-1">¿Quién paga la comisión?</label>
-              <select id="cobro-responsable" class="w-full border p-2 rounded" onchange="actualizarVistaCobro()">
+              <label class="block text-sm font-semibold mb-1 text-gray-700">¿Quién paga la comisión?</label>
+              <select id="cobro-responsable" class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="actualizarVistaCobro()">
                 <option value="proveedor">Solo el Proveedor</option>
                 <option value="cliente">Solo el Cliente</option>
-                <option value="ambos">Ambos (50/50 o acordado)</option>
+                <option value="ambos">Ambos (50/50)</option>
                 <option value="a_eleccion">A elección (se define al pagar)</option>
               </select>
             </div>
             <div>
-              <label class="block text-sm font-semibold mb-1">Monto Total (Bs)</label>
-              <input type="number" id="cobro-monto" step="0.01" class="w-full border p-2 rounded">
+              <label class="block text-sm font-semibold mb-1 text-gray-700">Monto Total de Comisión (Bs)</label>
+              <input type="number" id="cobro-monto" step="0.01" class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
             </div>
           </div>
 
-          <div class="space-y-3">
-            <label class="flex items-center space-x-3 p-3 bg-white rounded border cursor-pointer">
-              <input type="checkbox" id="cobro-cliente-pagado" class="w-5 h-5 text-blue-600" onchange="actualizarVistaCobro()">
+          <div class="space-y-3 mb-4">
+            <label class="flex items-start space-x-3 p-3 bg-gray-50 rounded border border-gray-200 cursor-pointer hover:bg-gray-100 transition">
+              <input type="checkbox" id="cobro-cliente-pagado" class="mt-1 w-5 h-5 text-blue-600 rounded focus:ring-blue-500" onchange="actualizarVistaCobro()">
               <div>
-                <span class="font-bold block">✅ El CLIENTE ya pagó su parte</span>
+                <span class="font-bold block text-gray-800">✅ El CLIENTE ya pagó su parte</span>
                 <span class="text-xs text-gray-600">Al marcar esto, se revelará el WhatsApp del PROVEEDOR al cliente.</span>
               </div>
             </label>
-            <label class="flex items-center space-x-3 p-3 bg-white rounded border cursor-pointer">
-              <input type="checkbox" id="cobro-proveedor-pagado" class="w-5 h-5 text-green-600" onchange="actualizarVistaCobro()">
+            
+            <label class="flex items-start space-x-3 p-3 bg-gray-50 rounded border border-gray-200 cursor-pointer hover:bg-gray-100 transition">
+              <input type="checkbox" id="cobro-proveedor-pagado" class="mt-1 w-5 h-5 text-green-600 rounded focus:ring-green-500" onchange="actualizarVistaCobro()">
               <div>
-                <span class="font-bold block">✅ El PROVEEDOR ya pagó su parte</span>
+                <span class="font-bold block text-gray-800">✅ El PROVEEDOR ya pagó su parte</span>
                 <span class="text-xs text-gray-600">Al marcar esto, se revelará el WhatsApp del CLIENTE al proveedor.</span>
               </div>
             </label>
           </div>
 
-          <div class="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded text-sm">
-            <p class="font-bold text-yellow-800 mb-1">📱 Vista Previa de Revelado de Contacto:</p>
-            <div id="vista-previa-contacto" class="space-y-1"></div>
+          <div class="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <p class="font-bold text-yellow-800 mb-2 text-sm flex items-center gap-2">
+              <i class="fab fa-whatsapp text-green-600"></i> Vista Previa de Revelado de Contacto:
+            </p>
+            <div id="vista-previa-contacto" class="space-y-2 text-sm"></div>
           </div>
 
           <div class="mt-4">
-            <label class="block text-sm font-semibold mb-1">Nota interna (opcional)</label>
-            <textarea id="cobro-nota" rows="2" class="w-full border p-2 rounded" placeholder="Ej: Pago recibido por QR, transferencia, etc."></textarea>
+            <label class="block text-sm font-semibold mb-1 text-gray-700">Nota interna (opcional)</label>
+            <textarea id="cobro-nota" rows="2" class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ej: Pago recibido por QR, transferencia, efectivo, etc."></textarea>
           </div>
         </div>
 
-        <div class="flex justify-end gap-3 pt-4 border-t">
-          <button onclick="cerrarModal()" class="px-4 py-2 border rounded hover:bg-gray-100">Cancelar</button>
-          <button onclick="guardarCobroYDatos()" class="px-6 py-2 bg-blue-600 text-white rounded font-bold hover:bg-blue-700 shadow">
-            <i class="fas fa-save mr-2"></i>Guardar Cobro y Actualizar
+        <div class="flex justify-end gap-3 pt-4 border-t border-gray-200">
+          <button onclick="cerrarModal()" class="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-100 transition">Cancelar</button>
+          <button onclick="guardarCobroYDatos()" class="px-6 py-2 bg-blue-600 text-white rounded font-bold hover:bg-blue-700 shadow-md transition flex items-center gap-2">
+            <i class="fas fa-save"></i> Guardar Cobro y Actualizar
           </button>
         </div>
       </div>
     </div>
   </div>
 
+  <!-- ==================== SCRIPTS ==================== -->
   <script src="supabase-config.js"></script>
   <script>
-    // Inicialización de Supabase
-    const supabaseUrl = window.SUPABASE_URL; // Asegúrate que tu supabase-config.js exporte estas variables
+    // 1. Inicialización segura y única del cliente de Supabase
+    const supabaseUrl = window.SUPABASE_URL;
     const supabaseKey = window.SUPABASE_ANON_KEY;
-    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+    if (!supabaseUrl || !supabaseKey || supabaseUrl.includes('xxxxx')) {
+      console.error("ERROR DE CONFIGURACIÓN: Revisa que 'supabase-config.js' tenga tu URL y ANON KEY reales.");
+      alert("Error de configuración: Faltan credenciales de Supabase.");
+    }
+
+    // Usamos 'supabaseClient' para evitar conflictos con el objeto global del CDN
+    const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
     let currentUser = null;
     let montoDefault = 10.00;
 
     // --- AUTENTICACIÓN ---
     async function checkAuth() {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        currentUser = session.user;
-        document.getElementById('login-screen').classList.add('hidden');
-        document.getElementById('main-app').classList.remove('hidden');
-        cargarDashboard();
-      } else {
-        document.getElementById('login-screen').classList.remove('hidden');
-        document.getElementById('main-app').classList.add('hidden');
+      try {
+        const { data: { session }, error } = await supabaseClient.auth.getSession();
+        if (error) throw error;
+        
+        if (session) {
+          currentUser = session.user;
+          document.getElementById('login-screen').classList.add('hidden');
+          document.getElementById('main-app').classList.remove('hidden');
+          cargarDashboard();
+        } else {
+          document.getElementById('login-screen').classList.remove('hidden');
+          document.getElementById('main-app').classList.add('hidden');
+        }
+      } catch (err) {
+        console.error("Error de autenticación:", err);
+        alert("Error al verificar sesión: " + err.message);
       }
     }
 
     async function login() {
       const email = document.getElementById('login-email').value;
       const password = document.getElementById('login-password').value;
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) {
-        document.getElementById('login-error').textContent = error.message;
-        document.getElementById('login-error').classList.remove('hidden');
-      } else {
+      
+      if (!email || !password) {
+        alert("Por favor ingresa correo y contraseña");
+        return;
+      }
+
+      const btn = document.querySelector('#login-screen button');
+      const originalText = btn.textContent;
+      btn.textContent = 'Verificando...';
+      btn.disabled = true;
+
+      try {
+        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        
+        document.getElementById('login-error').classList.add('hidden');
         checkAuth();
+      } catch (err) {
+        console.error("Error de login:", err);
+        document.getElementById('login-error').textContent = "Error: " + err.message;
+        document.getElementById('login-error').classList.remove('hidden');
+      } finally {
+        btn.textContent = originalText;
+        btn.disabled = false;
       }
     }
 
     async function logout() {
-      await supabase.auth.signOut();
-      checkAuth();
+      await supabaseClient.auth.signOut();
+      window.location.reload();
     }
 
     // --- NAVEGACIÓN ---
     function showTab(tabId) {
       document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
       document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+      
       document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.classList.remove('text-blue-900', 'border-b-2', 'border-blue-900');
         btn.classList.add('text-gray-600');
       });
-      document.querySelector(`[data-tab="${tabId}"]`).classList.add('text-blue-900', 'border-b-2', 'border-blue-900');
-      document.querySelector(`[data-tab="${tabId}"]`).classList.remove('text-gray-600');
+      
+      const activeBtn = document.querySelector(`[data-tab="${tabId}"]`);
+      if (activeBtn) {
+        activeBtn.classList.add('text-blue-900', 'border-b-2', 'border-blue-900');
+        activeBtn.classList.remove('text-gray-600');
+      }
       
       if (tabId === 'solicitudes') cargarSolicitudes();
       if (tabId === 'cobros') cargarCobros();
@@ -312,10 +370,10 @@
     // --- DASHBOARD ---
     async function cargarDashboard() {
       const hoy = new Date().toISOString().split('T')[0];
-      const { count: solicitudesHoy } = await supabase.from('solicitudes').select('*', { count: 'exact', head: true }).gte('created_at', hoy);
+      const { count: solicitudesHoy } = await supabaseClient.from('solicitudes').select('*', { count: 'exact', head: true }).gte('created_at', hoy);
       document.getElementById('stat-solicitudes-hoy').textContent = solicitudesHoy || 0;
 
-      const { data: cobros } = await supabase.from('cobros').select('cliente_pagado, proveedor_pagado, monto_cliente, monto_proveedor');
+      const { data: cobros } = await supabaseClient.from('cobros').select('cliente_pagado, proveedor_pagado, monto_cliente, monto_proveedor');
       let pendientes = 0, ingresos = 0;
       if (cobros) {
         cobros.forEach(c => {
@@ -327,16 +385,15 @@
       document.getElementById('stat-cobros-pendientes').textContent = pendientes;
       document.getElementById('stat-ingresos').textContent = ingresos.toFixed(2);
       
-      // Tasa de conversión (aceptadas / difundidas)
-      const { count: aceptadas } = await supabase.from('solicitudes').select('*', { count: 'exact', head: true }).eq('estado', 'aceptada');
-      const { count: difundidas } = await supabase.from('solicitudes').select('*', { count: 'exact', head: true }).in('estado', ['difundida', 'aceptada', 'cotizada', 'pagada', 'en_ejecucion', 'completada']);
+      const { count: aceptadas } = await supabaseClient.from('solicitudes').select('*', { count: 'exact', head: true }).eq('estado', 'aceptada');
+      const { count: difundidas } = await supabaseClient.from('solicitudes').select('*', { count: 'exact', head: true }).in('estado', ['difundida', 'aceptada', 'cotizada', 'pagada', 'en_ejecucion', 'completada']);
       const tasa = difundidas > 0 ? ((aceptadas / difundidas) * 100).toFixed(1) : 0;
       document.getElementById('stat-conversion').textContent = tasa + '%';
     }
 
-    // --- SOLICITUDES Y MODAL DE COBRO ---
+    // --- SOLICITUDES ---
     async function cargarSolicitudes() {
-      const { data, error } = await supabase.from('solicitudes').select(`
+      const { data, error } = await supabaseClient.from('solicitudes').select(`
         id, created_at, estado,
         clientes (nombre, whatsapp),
         categorias (nombre),
@@ -348,14 +405,14 @@
       if (data) {
         data.forEach(s => {
           const tr = document.createElement('tr');
-          tr.className = 'border-b hover:bg-gray-50';
+          tr.className = 'hover:bg-gray-50 transition';
           tr.innerHTML = `
-            <td class="p-4">${new Date(s.created_at).toLocaleDateString()}</td>
-            <td class="p-4 font-medium">${s.clientes?.nombre || 'N/A'}</td>
-            <td class="p-4"><span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">${s.categorias?.nombre || 'N/A'}</span></td>
-            <td class="p-4"><span class="px-2 py-1 rounded text-xs font-bold ${getEstadoColor(s.estado)}">${s.estado.toUpperCase()}</span></td>
+            <td class="p-4 text-gray-600">${new Date(s.created_at).toLocaleDateString()}</td>
+            <td class="p-4 font-medium text-gray-800">${s.clientes?.nombre || 'N/A'}</td>
+            <td class="p-4"><span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-semibold">${s.categorias?.nombre || 'N/A'}</span></td>
+            <td class="p-4"><span class="px-2 py-1 rounded text-xs font-bold ${getEstadoColor(s.estado)}">${s.estado ? s.estado.toUpperCase() : 'PENDIENTE'}</span></td>
             <td class="p-4">
-              <button onclick="abrirModalGestion('${s.id}')" class="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700">Gestionar</button>
+              <button onclick="abrirModalGestion('${s.id}')" class="bg-blue-600 text-white px-3 py-1.5 rounded text-sm hover:bg-blue-700 transition shadow-sm">Gestionar</button>
             </td>
           `;
           tbody.appendChild(tr);
@@ -364,7 +421,12 @@
     }
 
     function getEstadoColor(estado) {
-      const colores = { pendiente: 'bg-gray-200 text-gray-800', difundida: 'bg-yellow-100 text-yellow-800', aceptada: 'bg-green-100 text-green-800', completada: 'bg-blue-100 text-blue-800' };
+      const colores = { 
+        pendiente: 'bg-gray-200 text-gray-800', 
+        difundida: 'bg-yellow-100 text-yellow-800', 
+        aceptada: 'bg-green-100 text-green-800', 
+        completada: 'bg-blue-100 text-blue-800' 
+      };
       return colores[estado] || 'bg-gray-100 text-gray-800';
     }
 
@@ -372,8 +434,7 @@
       document.getElementById('modal-gestion').classList.remove('hidden');
       document.getElementById('modal-solicitud-id').value = solicitudId;
 
-      // Obtener datos detallados
-      const { data: sol } = await supabase.from('solicitudes').select(`
+      const { data: sol } = await supabaseClient.from('solicitudes').select(`
         *, clientes (nombre, whatsapp), proveedores!proveedor_asignado_id (id, nombre_razon_social, whatsapp)
       `).eq('id', solicitudId).single();
 
@@ -384,8 +445,7 @@
         document.getElementById('modal-proveedor-ws').textContent = sol.proveedores?.whatsapp || '-';
         document.getElementById('modal-proveedor-id').value = sol.proveedores?.id || '';
 
-        // Cargar cobro existente o defaults
-        const { data: cobro } = await supabase.from('cobros').select('*').eq('solicitud_id', solicitudId).single();
+        const { data: cobro } = await supabaseClient.from('cobros').select('*').eq('solicitud_id', solicitudId).single();
         
         document.getElementById('cobro-responsable').value = cobro?.responsable_pago || 'proveedor';
         document.getElementById('cobro-monto').value = cobro ? (parseFloat(cobro.monto_cliente || 0) + parseFloat(cobro.monto_proveedor || 0)) : montoDefault;
@@ -408,16 +468,16 @@
       const wsProveedor = document.getElementById('modal-proveedor-ws').textContent;
 
       let html = '';
-      if (proveedorPago && wsProveedor !== '-') {
-        html += `<p class="text-green-700 font-semibold"><i class="fab fa-whatsapp mr-1"></i> WhatsApp del Cliente revelado al Proveedor: <a href="https://wa.me/${wsCliente}" target="_blank" class="underline">${wsCliente}</a></p>`;
+      if (proveedorPago && wsProveedor !== '-' && wsProveedor !== 'No asignado') {
+        html += `<p class="text-green-700 font-semibold flex items-center gap-2"><i class="fab fa-whatsapp text-lg"></i> WhatsApp del Cliente revelado al Proveedor: <a href="https://wa.me/${wsCliente}" target="_blank" class="underline hover:text-green-800">${wsCliente}</a></p>`;
       } else {
-        html += `<p class="text-red-600 text-xs">⛔ Proveedor debe pagar para ver el WhatsApp del cliente.</p>`;
+        html += `<p class="text-red-600 text-xs flex items-center gap-1"><i class="fas fa-lock"></i> El proveedor debe pagar su comisión para ver el WhatsApp del cliente.</p>`;
       }
 
-      if (clientePago && wsCliente !== '-') {
-        html += `<p class="text-green-700 font-semibold mt-2"><i class="fab fa-whatsapp mr-1"></i> WhatsApp del Proveedor revelado al Cliente: <a href="https://wa.me/${wsProveedor}" target="_blank" class="underline">${wsProveedor}</a></p>`;
+      if (clientePago && wsCliente !== '-' && wsCliente !== 'No asignado') {
+        html += `<p class="text-green-700 font-semibold flex items-center gap-2 mt-2"><i class="fab fa-whatsapp text-lg"></i> WhatsApp del Proveedor revelado al Cliente: <a href="https://wa.me/${wsProveedor}" target="_blank" class="underline hover:text-green-800">${wsProveedor}</a></p>`;
       } else {
-        html += `<p class="text-red-600 text-xs mt-1">⛔ Cliente debe pagar para ver el WhatsApp del proveedor.</p>`;
+        html += `<p class="text-red-600 text-xs flex items-center gap-1 mt-1"><i class="fas fa-lock"></i> El cliente debe pagar su comisión para ver el WhatsApp del proveedor.</p>`;
       }
       document.getElementById('vista-previa-contacto').innerHTML = html;
     }
@@ -428,7 +488,6 @@
       const responsable = document.getElementById('cobro-responsable').value;
       const montoTotal = parseFloat(document.getElementById('cobro-monto').value) || 0;
       
-      // Distribuir monto según responsable (lógica simple, ajustable)
       let montoCliente = 0, montoProveedor = 0;
       if (responsable === 'cliente') montoCliente = montoTotal;
       else if (responsable === 'proveedor') montoProveedor = montoTotal;
@@ -443,7 +502,7 @@
         return;
       }
 
-      const { error } = await supabase.rpc('guardar_cobro', {
+      const { error } = await supabaseClient.rpc('guardar_cobro', {
         p_solicitud_id: solicitudId,
         p_proveedor_id: proveedorId,
         p_responsable_pago: responsable,
@@ -456,6 +515,7 @@
 
       if (error) {
         alert('Error al guardar: ' + error.message);
+        console.error(error);
       } else {
         alert('Cobro guardado y contactos actualizados correctamente.');
         cerrarModal();
@@ -466,8 +526,8 @@
 
     // --- COBROS ---
     async function cargarCobros() {
-      const { data } = await supabase.from('cobros').select(`
-        id, responsable_pago, monto_cliente, monto_proveedor, cliente_pagado, proveedor_pagado, nota,
+      const { data } = await supabaseClient.from('cobros').select(`
+        id, responsable_pago, monto_cliente, monto_proveedor, cliente_pagado, proveedor_pagado, nota, created_at,
         solicitudes (id, descripcion),
         proveedores (nombre_razon_social)
       `).order('created_at', { ascending: false });
@@ -477,20 +537,19 @@
       if (data) {
         data.forEach(c => {
           const total = (parseFloat(c.monto_cliente) || 0) + (parseFloat(c.monto_proveedor) || 0);
-          const pagado = c.cliente_pagado || c.proveedor_pagado;
           const tr = document.createElement('tr');
-          tr.className = 'border-b hover:bg-gray-50';
+          tr.className = 'hover:bg-gray-50 transition';
           tr.innerHTML = `
-            <td class="p-4 text-xs">${c.solicitudes?.id.substring(0,8)}...<br><span class="text-gray-500">${c.proveedores?.nombre_razon_social}</span></td>
-            <td class="p-4 capitalize">${c.responsable_pago.replace('_', ' ')}</td>
-            <td class="p-4 font-bold">Bs ${total.toFixed(2)}</td>
+            <td class="p-4 text-xs text-gray-600">${c.solicitudes?.id ? c.solicitudes.id.substring(0,8) + '...' : 'N/A'}<br><span class="font-medium text-gray-800">${c.proveedores?.nombre_razon_social || 'Sin proveedor'}</span></td>
+            <td class="p-4 capitalize text-gray-700">${c.responsable_pago ? c.responsable_pago.replace('_', ' ') : 'proveedor'}</td>
+            <td class="p-4 font-bold text-gray-800">Bs ${total.toFixed(2)}</td>
             <td class="p-4">
-              ${c.cliente_pagado ? '<span class="text-green-600 text-xs">✅ Cliente</span><br>' : '<span class="text-red-500 text-xs">⏳ Cliente</span><br>'}
-              ${c.proveedor_pagado ? '<span class="text-green-600 text-xs">✅ Proveedor</span>' : '<span class="text-red-500 text-xs">⏳ Proveedor</span>'}
+              ${c.cliente_pagado ? '<span class="text-green-600 text-xs font-semibold">✅ Cliente</span><br>' : '<span class="text-red-500 text-xs font-semibold">⏳ Cliente</span><br>'}
+              ${c.proveedor_pagado ? '<span class="text-green-600 text-xs font-semibold">✅ Proveedor</span>' : '<span class="text-red-500 text-xs font-semibold">⏳ Proveedor</span>'}
             </td>
             <td class="p-4">
-              ${!c.proveedor_pagado ? `<button onclick="registrarPagoManual('${c.id}', 'proveedor')" class="text-xs bg-green-600 text-white px-2 py-1 rounded mb-1">Marcar Pagó Prov.</button><br>` : ''}
-              ${!c.cliente_pagado ? `<button onclick="registrarPagoManual('${c.id}', 'cliente')" class="text-xs bg-blue-600 text-white px-2 py-1 rounded">Marcar Pagó Cli.</button>` : ''}
+              ${!c.proveedor_pagado ? `<button onclick="registrarPagoManual('${c.id}', 'proveedor')" class="text-xs bg-green-600 text-white px-2 py-1.5 rounded mb-1 hover:bg-green-700 transition block w-full text-center">Marcar Pagó Prov.</button>` : ''}
+              ${!c.cliente_pagado ? `<button onclick="registrarPagoManual('${c.id}', 'cliente')" class="text-xs bg-blue-600 text-white px-2 py-1.5 rounded hover:bg-blue-700 transition block w-full text-center">Marcar Pagó Cli.</button>` : ''}
             </td>
           `;
           tbody.appendChild(tr);
@@ -500,27 +559,26 @@
 
     async function registrarPagoManual(cobroId, quien) {
       const updates = quien === 'proveedor' ? { proveedor_pagado: true } : { cliente_pagado: true };
-      await supabase.from('cobros').update(updates).eq('id', cobroId);
+      await supabaseClient.from('cobros').update(updates).eq('id', cobroId);
       cargarCobros();
       cargarDashboard();
     }
 
     // --- PROVEEDORES ---
     async function cargarProveedores() {
-      const { data } = await supabase.from('proveedores').select('id, nombre_razon_social, whatsapp, activo').order('created_at', { ascending: false });
+      const { data } = await supabaseClient.from('proveedores').select('id, nombre_razon_social, whatsapp, activo').order('created_at', { ascending: false });
       const tbody = document.getElementById('tabla-proveedores');
       tbody.innerHTML = '';
       if (data) {
         data.forEach(p => {
           const tr = document.createElement('tr');
-          tr.className = 'border-b hover:bg-gray-50';
+          tr.className = 'hover:bg-gray-50 transition';
           tr.innerHTML = `
-            <td class="p-4 font-medium">${p.nombre_razon_social}</td>
-            <td class="p-4">${p.whatsapp}</td>
-            <td class="p-4 text-xs text-gray-500">Ver en perfil</td>
-            <td class="p-4"><span class="px-2 py-1 rounded text-xs ${p.activo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${p.activo ? 'Activo' : 'Inactivo'}</span></td>
+            <td class="p-4 font-medium text-gray-800">${p.nombre_razon_social}</td>
+            <td class="p-4 text-gray-600">${p.whatsapp || '-'}</td>
+            <td class="p-4"><span class="px-2 py-1 rounded text-xs font-semibold ${p.activo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${p.activo ? 'Activo' : 'Inactivo'}</span></td>
             <td class="p-4">
-              <button onclick="toggleProveedor('${p.id}', ${!p.activo})" class="text-xs border px-2 py-1 rounded hover:bg-gray-100">
+              <button onclick="toggleProveedor('${p.id}', ${!p.activo})" class="text-xs border border-gray-300 px-3 py-1.5 rounded hover:bg-gray-100 transition text-gray-700">
                 ${p.activo ? 'Desactivar' : 'Activar'}
               </button>
             </td>
@@ -531,69 +589,84 @@
     }
 
     async function toggleProveedor(id, nuevoEstado) {
-      await supabase.from('proveedores').update({ activo: nuevoEstado }).eq('id', id);
+      await supabaseClient.from('proveedores').update({ activo: nuevoEstado }).eq('id', id);
       cargarProveedores();
     }
 
-    // --- CATALOGO ---
+    // --- CATÁLOGO ---
     async function cargarCatalogo() {
-      const { data: zonas } = await supabase.from('zonas').select('id, nombre, activa').order('nombre');
-      const { data: categorias } = await supabase.from('categorias').select('id, nombre, activa').order('nombre');
+      const { data: zonas } = await supabaseClient.from('zonas').select('id, nombre, activa').order('nombre');
+      const { data: categorias } = await supabaseClient.from('categorias').select('id, nombre, activa').order('nombre');
       
-      document.getElementById('lista-zonas').innerHTML = zonas.map(z => `<li class="flex justify-between items-center bg-gray-50 p-2 rounded"><span>${z.nombre}</span> <button onclick="toggleCatalogo('zonas', '${z.id}', ${!z.activa})" class="text-xs text-blue-600">${z.activa ? 'Desactivar' : 'Activar'}</button></li>`).join('');
-      document.getElementById('lista-categorias').innerHTML = categorias.map(c => `<li class="flex justify-between items-center bg-gray-50 p-2 rounded"><span>${c.nombre}</span> <button onclick="toggleCatalogo('categorias', '${c.id}', ${!c.activa})" class="text-xs text-blue-600">${c.activa ? 'Desactivar' : 'Activar'}</button></li>`).join('');
+      document.getElementById('lista-zonas').innerHTML = zonas ? zonas.map(z => `
+        <li class="flex justify-between items-center bg-gray-50 p-3 rounded border border-gray-100">
+          <span class="font-medium text-gray-700">${z.nombre}</span> 
+          <button onclick="toggleCatalogo('zonas', '${z.id}', ${!z.activa})" class="text-xs text-blue-600 hover:text-blue-800 font-semibold hover:underline">
+            ${z.activa ? 'Desactivar' : 'Activar'}
+          </button>
+        </li>
+      `).join('') : '<li class="text-gray-500 text-sm">No hay zonas registradas.</li>';
+      
+      document.getElementById('lista-categorias').innerHTML = categorias ? categorias.map(c => `
+        <li class="flex justify-between items-center bg-gray-50 p-3 rounded border border-gray-100">
+          <span class="font-medium text-gray-700">${c.nombre}</span> 
+          <button onclick="toggleCatalogo('categorias', '${c.id}', ${!c.activa})" class="text-xs text-blue-600 hover:text-blue-800 font-semibold hover:underline">
+            ${c.activa ? 'Desactivar' : 'Activar'}
+          </button>
+        </li>
+      `).join('') : '<li class="text-gray-500 text-sm">No hay categorías registradas.</li>';
     }
 
     async function agregarZona() {
-      const nombre = document.getElementById('nueva-zona').value;
+      const nombre = document.getElementById('nueva-zona').value.trim();
       if (nombre) {
-        await supabase.from('zonas').insert({ nombre, activa: true });
+        await supabaseClient.from('zonas').insert({ nombre, activa: true });
         document.getElementById('nueva-zona').value = '';
         cargarCatalogo();
       }
     }
 
     async function agregarCategoria() {
-      const nombre = document.getElementById('nueva-categoria').value;
+      const nombre = document.getElementById('nueva-categoria').value.trim();
       if (nombre) {
-        await supabase.from('categorias').insert({ nombre, activa: true });
+        await supabaseClient.from('categorias').insert({ nombre, activa: true });
         document.getElementById('nueva-categoria').value = '';
         cargarCatalogo();
       }
     }
 
     async function toggleCatalogo(tabla, id, nuevoEstado) {
-      await supabase.from(tabla).update({ activa: nuevoEstado }).eq('id', id);
+      await supabaseClient.from(tabla).update({ activa: nuevoEstado }).eq('id', id);
       cargarCatalogo();
     }
 
     // --- MEDIACIONES ---
     async function cargarMediaciones() {
-      const { data } = await supabase.from('mediaciones').select('*, solicitudes (id)').order('created_at', { ascending: false });
+      const { data } = await supabaseClient.from('mediaciones').select('*, solicitudes (id)').order('created_at', { ascending: false });
       const container = document.getElementById('lista-mediaciones');
       container.innerHTML = '';
       if (data && data.length > 0) {
         data.forEach(m => {
           const div = document.createElement('div');
-          div.className = 'border p-4 rounded bg-gray-50';
+          div.className = 'border border-gray-200 p-4 rounded-lg bg-gray-50';
           div.innerHTML = `
             <div class="flex justify-between mb-2">
-              <span class="font-bold text-sm">Solicitud: ${m.solicitudes?.id.substring(0,8)}</span>
-              <span class="text-xs ${m.atendida ? 'text-green-600' : 'text-red-600'}">${m.atendida ? 'Resuelta' : 'Pendiente'}</span>
+              <span class="font-bold text-sm text-gray-800">Solicitud: ${m.solicitudes?.id ? m.solicitudes.id.substring(0,8) : 'N/A'}</span>
+              <span class="text-xs font-semibold px-2 py-1 rounded ${m.atendida ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${m.atendida ? 'Resuelta' : 'Pendiente'}</span>
             </div>
-            <p class="text-sm mb-2"><strong>Motivo:</strong> ${m.motivo}</p>
-            <p class="text-sm text-gray-600"><strong>Resolución:</strong> ${m.resolucion || 'Sin resolver'}</p>
+            <p class="text-sm mb-2 text-gray-700"><strong class="text-gray-900">Motivo:</strong> ${m.motivo || 'No especificado'}</p>
+            <p class="text-sm text-gray-600"><strong class="text-gray-900">Resolución:</strong> ${m.resolucion || 'Sin resolver aún'}</p>
           `;
           container.appendChild(div);
         });
       } else {
-        container.innerHTML = '<p class="text-gray-500">No hay mediaciones registradas.</p>';
+        container.innerHTML = '<p class="text-gray-500 text-center py-4">No hay mediaciones registradas.</p>';
       }
     }
 
-    // --- CONFIGURACION ---
+    // --- CONFIGURACIÓN ---
     async function cargarConfiguracion() {
-      const { data } = await supabase.from('configuracion').select('valor').eq('clave', 'monto_comision_default').single();
+      const { data } = await supabaseClient.from('configuracion').select('valor').eq('clave', 'monto_comision_default').single();
       if (data) {
         montoDefault = parseFloat(data.valor);
         document.getElementById('config-monto').value = montoDefault;
@@ -602,12 +675,16 @@
 
     async function guardarConfiguracion() {
       const nuevoMonto = document.getElementById('config-monto').value;
-      await supabase.from('configuracion').upsert({ clave: 'monto_comision_default', valor: nuevoMonto });
+      if (!nuevoMonto || nuevoMonto < 0) {
+        alert("Por favor ingresa un monto válido.");
+        return;
+      }
+      await supabaseClient.from('configuracion').upsert({ clave: 'monto_comision_default', valor: nuevoMonto });
       alert('Configuración guardada. El nuevo monto por defecto será Bs ' + nuevoMonto);
       montoDefault = parseFloat(nuevoMonto);
     }
 
-    // Iniciar
+    // Iniciar la aplicación al cargar la página
     checkAuth();
   </script>
 </body>
