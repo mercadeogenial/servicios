@@ -1,270 +1,127 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ServiExpress — Solicitar un servicio</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,600;9..144,900&family=Archivo:wght@400;500;600;700&display=swap');
-  :root{
-    --rust:#c1502e; --rust-dark:#9c3d20; --ink:#1c1a17; --paper:#f4ede2;
-    --paper-warm:#ece2d2; --teal:#1f4741; --line:#d8cbb3; --err:#9c3d20;
-  }
-  *{box-sizing:border-box; margin:0; padding:0;}
-  body{background:var(--paper); color:var(--ink); font-family:'Archivo',sans-serif; line-height:1.5; padding:0 6vw 60px;}
-  h1{font-family:'Fraunces',serif; font-weight:900; font-size:clamp(1.8rem,4vw,2.6rem); margin:36px 0 6px;}
-  p.lede{color:#4a453d; margin-bottom:28px; max-width:60ch;}
-  .card{background:var(--paper-warm); border:2px solid var(--ink); border-radius:18px; padding:32px; max-width:640px; margin:0 auto; box-shadow:8px 8px 0 var(--ink);}
-  label{display:block; font-size:0.8rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; margin:18px 0 6px; color:var(--teal);}
-  label:first-of-type{margin-top:0;}
-  input, select, textarea{width:100%; padding:12px 14px; border:2px solid var(--ink); border-radius:10px; font-family:'Archivo',sans-serif; font-size:1rem; background:#fff; color:var(--ink);}
-  input:invalid{box-shadow:none;}
-  input.field-error, select.field-error, textarea.field-error{border-color:var(--err); background:#fbeee9;}
-  .hint{font-size:0.75rem; color:#7a7264; margin-top:5px;}
-  .field-msg{font-size:0.75rem; color:var(--err); margin-top:5px; display:none;}
-  .field-msg.show{display:block;}
-  textarea{resize:vertical; min-height:80px;}
-  .row2{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
-  @media(max-width:480px){ .row2{grid-template-columns:1fr;} }
-  .chips{display:flex; flex-wrap:wrap; gap:8px; margin-top:6px;}
-  .chip{border:2px solid var(--ink); border-radius:100px; padding:8px 14px; font-size:0.85rem; cursor:pointer; background:#fff; font-weight:600; user-select:none;}
-  .chip.selected{background:var(--rust); color:#fff; border-color:var(--rust);}
-  .checkbox-row{display:flex; align-items:flex-start; gap:10px; margin-top:20px;}
-  .checkbox-row input{width:auto; margin-top:4px;}
-  .fotos-preview{display:flex; flex-wrap:wrap; gap:10px; margin-top:10px;}
-  .fotos-preview .thumb{position:relative; width:72px; height:72px; border-radius:10px; border:2px solid var(--ink); object-fit:cover;}
-  .submit-btn{margin-top:26px; width:100%; padding:17px; border-radius:12px; border:2px solid var(--ink); background:var(--rust); color:#fff; font-family:'Fraunces',serif; font-weight:900; font-size:1.1rem; cursor:pointer; box-shadow:5px 5px 0 var(--ink); transition:transform .08s, box-shadow .08s;}
-  .submit-btn:hover:not(:disabled){transform:translate(-2px,-2px); box-shadow:7px 7px 0 var(--ink);}
-  .submit-btn:disabled{opacity:0.6; cursor:not-allowed;}
-  #successBox, #errorBox{display:none; max-width:640px; margin:20px auto; padding:20px; border-radius:14px; border:2px solid var(--ink); font-weight:600;}
-  #successBox{background:#e4efe6;}
-  #errorBox{background:#f6dcd4;}
-  .fineprint{font-size:0.78rem; color:#7a7264; margin-top:14px; text-align:center;}
-  a.wa-link{display:inline-block; margin-top:10px; background:var(--teal); color:#fff; padding:12px 20px; border-radius:10px; text-decoration:none; font-weight:700;}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ServiExpress — Solicitar un servicio</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body>
-  <h1>Contanos qué necesitás</h1>
-  <p class="lede">Te derivamos con un proveedor verificado y coordinamos por WhatsApp.</p>
+<body class="bg-gray-50 text-gray-800 font-sans">
+  <div class="max-w-2xl mx-auto p-6">
+    <a href="index.html" class="text-blue-600 hover:underline mb-4 inline-block font-semibold">← Volver al inicio</a>
+    <h1 class="text-3xl font-bold text-blue-900 mb-2">Solicitar un servicio</h1>
+    <p class="text-gray-600 mb-6">Contanos qué necesitás. Te derivamos con un proveedor verificado y coordinamos por WhatsApp.</p>
 
-  <div class="card">
-    <form id="clienteForm" novalidate>
-      <label>Nombre completo</label>
-      <input id="nombre" required placeholder="Ej. María Fernández">
-      <div class="field-msg" data-for="nombre">Ingresá tu nombre.</div>
-
-      <div class="row2">
-        <div>
-          <label>WhatsApp</label>
-          <input id="whatsapp" required inputmode="tel" placeholder="Ej. 71234567">
-          <div class="hint">8 dígitos, empieza en 6 o 7 (con o sin +591).</div>
-          <div class="field-msg" data-for="whatsapp">Número de WhatsApp boliviano inválido.</div>
-        </div>
-        <div>
-          <label>Zona</label>
-          <select id="zona" required><option value="">Cargando zonas…</option></select>
-          <div class="field-msg" data-for="zona">Elegí tu zona.</div>
-        </div>
+    <form id="form-cliente" class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 space-y-4">
+      <div>
+        <label class="block text-sm font-semibold mb-1">Nombre completo</label>
+        <input type="text" id="nombre" required class="w-full border border-gray-300 p-3 rounded focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Ingresá tu nombre">
+      </div>
+      <div>
+        <label class="block text-sm font-semibold mb-1">WhatsApp</label>
+        <input type="text" id="whatsapp" required pattern="^(?:\+?591)?[67][0-9]{7}$" class="w-full border border-gray-300 p-3 rounded focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Ej: 71234567">
+        <p class="text-xs text-gray-500 mt-1">8 dígitos, empieza en 6 o 7 (con o sin +591).</p>
+      </div>
+      <div>
+        <label class="block text-sm font-semibold mb-1">Zona</label>
+        <select id="zona" required class="w-full border border-gray-300 p-3 rounded focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          <option value="">Cargando zonas…</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-semibold mb-1">Dirección exacta / condominio y N° de casa</label>
+        <input type="text" id="direccion" required class="w-full border border-gray-300 p-3 rounded focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Ej: Av. Banzer 4to anillo, Casa 5">
+      </div>
+      <div>
+        <label class="block text-sm font-semibold mb-1">Categoría de servicio</label>
+        <select id="categoria" required class="w-full border border-gray-300 p-3 rounded focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          <option value="">Cargando categorías…</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-semibold mb-1">Describí el trabajo</label>
+        <textarea id="descripcion" required rows="4" class="w-full border border-gray-300 p-3 rounded focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Contanos brevemente qué necesitás."></textarea>
+      </div>
+      <div>
+        <label class="block text-sm font-semibold mb-1">Urgencia</label>
+        <select id="urgencia" class="w-full border border-gray-300 p-3 rounded focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          <option value="hoy">Hoy mismo</option>
+          <option value="2-3 dias">2-3 días</option>
+          <option value="esta_semana">Esta semana</option>
+          <option value="sin_apuro">Sin apuro</option>
+        </select>
       </div>
 
-      <label>Dirección exacta / condominio y N° de casa</label>
-      <input id="direccion" placeholder="Imprescindible en condominios cerrados">
-
-      <label>Categoría de servicio</label>
-      <select id="categoria" required><option value="">Cargando categorías…</option></select>
-      <div class="field-msg" data-for="categoria">Elegí una categoría.</div>
-
-      <label>Describí el trabajo</label>
-      <textarea id="descripcion" required placeholder="Ej. Se me tapó el desagüe de la cocina"></textarea>
-      <div class="field-msg" data-for="descripcion">Contanos brevemente qué necesitás.</div>
-
-      <label>Fotos del problema (opcional)</label>
-      <input id="fotos" type="file" accept="image/*" multiple>
-      <div class="hint">Hasta 5 imágenes de 5 MB. Ayudan al proveedor a cotizar mejor.</div>
-      <div class="fotos-preview" id="fotosPreview"></div>
-
-      <label>Urgencia</label>
-      <div class="chips" id="urgencia">
-        <div class="chip" data-v="Hoy mismo">Hoy mismo</div>
-        <div class="chip" data-v="En los próximos 2-3 días">2-3 días</div>
-        <div class="chip" data-v="Esta semana">Esta semana</div>
-        <div class="chip" data-v="Sin apuro">Sin apuro</div>
-      </div>
-
-      <label>Rango de presupuesto en mente (opcional)</label>
-      <select id="presupuesto">
-        <option value="">No sé / pedir cotización</option>
-        <option>&lt;100 Bs</option><option>100-300 Bs</option><option>300-600 Bs</option>
-        <option>600-1.000 Bs</option><option>+1.000 Bs</option>
-      </select>
-
-      <label>¿Cómo te enteraste de ServiExpress?</label>
-      <select id="canal">
-        <option value="">Seleccioná una opción</option>
-        <option>Facebook</option><option>Recomendación de alguien</option><option>Google</option><option>Otro</option>
-      </select>
-
-      <div class="checkbox-row">
-        <input type="checkbox" id="terminos" required>
-        <label style="margin:0; text-transform:none; font-size:0.85rem; font-weight:400; color:var(--ink);">
-          Acepto los Términos de Uso de ServiExpress. Entiendo que ServiExpress es un intermediario tecnológico,
-          que el contrato de servicio se celebra directamente con el proveedor, y que la mediación de disputas
-          es a discreción de ServiExpress.
+      <div class="pt-4 border-t border-gray-200">
+        <label class="flex items-start space-x-2 cursor-pointer">
+          <input type="checkbox" id="acepto-terminos-cli" name="acepto_terminos" required class="mt-1 mr-2 w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+          <span class="text-sm text-gray-600">
+            Acepto los <a href="terminos-clientes.html" target="_blank" class="text-blue-600 underline font-semibold">Términos de Uso para Clientes</a> de ServiExpress. Entiendo que ServiExpress es un intermediario tecnológico, que el contrato de servicio se celebra directamente con el proveedor, y que la mediación de disputas es a discreción de ServiExpress.
+          </span>
         </label>
       </div>
-      <div class="field-msg" data-for="terminos">Necesitás aceptar los Términos de Uso.</div>
 
-      <button type="submit" class="submit-btn" id="submitBtn">Enviar solicitud →</button>
-      <p class="fineprint">Tus datos se manejan según nuestra política de privacidad (Sección 9 de los Términos de Uso).</p>
+      <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition duration-200 shadow-md">Enviar solicitud →</button>
     </form>
 
-    <div id="successBox">
-      ✓ Solicitud enviada. Un operador te va a contactar por WhatsApp en breve.
-      <br><a class="wa-link" id="waLink" href="#" target="_blank">Avisar también por WhatsApp ahora →</a>
+    <div id="mensaje-exito" class="hidden bg-green-50 border border-green-200 text-green-800 p-6 rounded-lg shadow-sm mt-6 text-center">
+      <p class="font-bold text-lg mb-2">✓ Solicitud enviada</p>
+      <p class="mb-4">Un operador te va a contactar por WhatsApp en breve.</p>
     </div>
-    <div id="errorBox"></div>
   </div>
 
-<script src="supabase-config.js"></script>
-<script src="serviexpress.js"></script>
-<script>
-  const WHATSAPP_OPERADOR = "59170000000"; // reemplazar con el número real
+  <script src="supabase-config.js"></script>
+  <script>
+    // 1. Inicializar la conexión global (igual que en el panel)
+    window.db = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
 
-  let zonasMap = {}, categoriasMap = {};
+    // 2. Cargar Zonas y Categorías al iniciar
+    async function cargarOpcionesFormulario() {
+      try {
+        const { data: zonas } = await window.db.from('zonas').select('id, nombre').eq('activa', true).order('nombre');
+        const selectZona = document.getElementById('zona');
+        if (selectZona && zonas) {
+          selectZona.innerHTML = '<option value="">Elegí tu zona</option>' + zonas.map(z => `<option value="${z.id}">${z.nombre}</option>`).join('');
+        }
 
-  async function cargarOpciones(){
-    const { data: zonas, error: ez } = await supabaseClient.from('zonas').select('id,nombre,eje').eq('activa', true).order('nombre');
-    const zonaSelect = document.getElementById('zona');
-    if(ez){ zonaSelect.innerHTML = '<option value="">No se pudieron cargar las zonas</option>'; }
-    else {
-      zonaSelect.innerHTML = '<option value="">Seleccioná tu zona</option>';
-      const grupos = {};
-      (zonas || []).forEach(z => {
-        zonasMap[z.id] = z.nombre;
-        const grupo = z.eje || '__base__';
-        grupos[grupo] = grupos[grupo] || [];
-        grupos[grupo].push(z);
-      });
-      if(grupos['__base__']) grupos['__base__'].forEach(z=>{
-        if(z.nombre.includes('proveedor')) return; // esa opción es solo para el registro de proveedores
-        zonaSelect.innerHTML += `<option value="${z.id}">${z.nombre}</option>`;
-      });
-      Object.keys(grupos).filter(g=>g!=='__base__').forEach(eje=>{
-        zonaSelect.innerHTML += `<optgroup label="${eje}">`;
-        grupos[eje].forEach(z=> zonaSelect.innerHTML += `<option value="${z.id}">${z.nombre}</option>`);
-        zonaSelect.innerHTML += `</optgroup>`;
-      });
-    }
-
-    const { data: categorias, error: ec } = await supabaseClient.from('categorias').select('id,nombre').eq('activa', true).order('nombre');
-    const catSelect = document.getElementById('categoria');
-    if(ec){ catSelect.innerHTML = '<option value="">No se pudieron cargar las categorías</option>'; return; }
-    catSelect.innerHTML = '<option value="">Seleccioná una categoría</option>';
-    (categorias || []).forEach(c => { categoriasMap[c.id] = c.nombre; catSelect.innerHTML += `<option value="${c.id}">${c.nombre}</option>`; });
-  }
-  cargarOpciones();
-
-  document.querySelectorAll('#urgencia .chip').forEach(chip=>{
-    chip.addEventListener('click', ()=>{
-      document.querySelectorAll('#urgencia .chip').forEach(c=>c.classList.remove('selected'));
-      chip.classList.add('selected');
-    });
-  });
-
-  // Vista previa de fotos
-  const fotosInput = document.getElementById('fotos');
-  fotosInput.addEventListener('change', ()=>{
-    const prev = document.getElementById('fotosPreview');
-    prev.innerHTML = '';
-    Array.from(fotosInput.files).slice(0, ServiExpress.MAX_FILES).forEach(f=>{
-      if(!f.type.startsWith('image/')) return;
-      const img = document.createElement('img');
-      img.className = 'thumb'; img.src = URL.createObjectURL(f);
-      prev.appendChild(img);
-    });
-  });
-
-  function marcarError(id, mostrar){
-    const el = document.getElementById(id);
-    if(el) el.classList.toggle('field-error', mostrar);
-    const msg = document.querySelector(`.field-msg[data-for="${id}"]`);
-    if(msg) msg.classList.toggle('show', mostrar);
-  }
-
-  function validar(){
-    let ok = true;
-    const req = ['nombre','descripcion'];
-    req.forEach(id=>{
-      const bad = document.getElementById(id).value.trim() === '';
-      marcarError(id, bad); if(bad) ok = false;
-    });
-    const zonaBad = !document.getElementById('zona').value;
-    marcarError('zona', zonaBad); if(zonaBad) ok = false;
-    const catBad = !document.getElementById('categoria').value;
-    marcarError('categoria', catBad); if(catBad) ok = false;
-    const waBad = !ServiExpress.normalizarWhatsapp(document.getElementById('whatsapp').value);
-    marcarError('whatsapp', waBad); if(waBad) ok = false;
-    const termBad = !document.getElementById('terminos').checked;
-    marcarError('terminos', termBad); if(termBad) ok = false;
-    return ok;
-  }
-
-  document.getElementById('clienteForm').addEventListener('submit', async (e)=>{
-    e.preventDefault();
-    document.getElementById('errorBox').style.display = 'none';
-    if(!validar()){
-      document.querySelector('.field-error')?.scrollIntoView({behavior:'smooth', block:'center'});
-      return;
-    }
-
-    const btn = document.getElementById('submitBtn');
-    btn.disabled = true; btn.textContent = "Enviando…";
-
-    const urgenciaSel = document.querySelector('#urgencia .chip.selected');
-    const zonaId = document.getElementById('zona').value;
-    const categoriaId = document.getElementById('categoria').value;
-
-    try{
-      let fotos = [];
-      if(fotosInput.files.length){
-        btn.textContent = "Subiendo fotos…";
-        fotos = await ServiExpress.subirFotos(fotosInput.files, 'solicitudes', (h,t)=>{ btn.textContent = `Subiendo fotos… ${h}/${t}`; });
+        const { data: categorias } = await window.db.from('categorias').select('id, nombre').eq('activa', true).order('nombre');
+        const selectCat = document.getElementById('categoria');
+        if (selectCat && categorias) {
+          selectCat.innerHTML = '<option value="">Elegí una categoría</option>' + categorias.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
+        }
+      } catch (err) {
+        console.error("Error al cargar opciones:", err);
       }
-      btn.textContent = "Enviando…";
-
-      const { data: solicitudId, error } = await supabaseClient.rpc('crear_solicitud', {
-        p_nombre: document.getElementById('nombre').value,
-        p_whatsapp: document.getElementById('whatsapp').value,
-        p_zona_id: zonaId || null,
-        p_direccion: document.getElementById('direccion').value,
-        p_acepto_terminos: document.getElementById('terminos').checked,
-        p_categoria_id: categoriaId || null,
-        p_descripcion: document.getElementById('descripcion').value,
-        p_urgencia: urgenciaSel ? urgenciaSel.dataset.v : null,
-        p_rango_presupuesto: document.getElementById('presupuesto').value,
-        p_como_se_entero: document.getElementById('canal').value,
-        p_fotos: fotos
-      });
-      if(error) throw error;
-
-      document.getElementById('clienteForm').style.display = 'none';
-      document.getElementById('successBox').style.display = 'block';
-
-      const zonaNombre = zonasMap[zonaId] || '(sin zona)';
-      const catNombre = categoriasMap[categoriaId] || '(sin categoría)';
-      const idCorto = solicitudId ? String(solicitudId).slice(0,8) : '';
-      const msg = `Hola ServiExpress! Envié una solicitud (ID ${idCorto}).\n`
-        + `Categoría: ${catNombre}\nZona: ${zonaNombre}\nDescripción: ${document.getElementById('descripcion').value}`;
-      document.getElementById('waLink').href = `https://wa.me/${WHATSAPP_OPERADOR}?text=${encodeURIComponent(msg)}`;
-
-    }catch(err){
-      const box = document.getElementById('errorBox');
-      box.textContent = "Hubo un problema al enviar tu solicitud: " + (err.message || err);
-      box.style.display = 'block';
-      btn.disabled = false; btn.textContent = "Enviar solicitud →";
     }
-  });
-</script>
+    document.addEventListener('DOMContentLoaded', cargarOpcionesFormulario);
+
+    // 3. Manejar el envío del formulario
+    document.getElementById('form-cliente').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const btn = e.target.querySelector('button[type="submit"]');
+      btn.textContent = 'Enviando...'; btn.disabled = true;
+
+      const formData = {
+        nombre: document.getElementById('nombre').value,
+        whatsapp: document.getElementById('whatsapp').value,
+        zona_id: document.getElementById('zona').value,
+        direccion: document.getElementById('direccion').value,
+        categoria_id: document.getElementById('categoria').value,
+        descripcion: document.getElementById('descripcion').value,
+        urgencia: document.getElementById('urgencia').value,
+        estado: 'pendiente'
+      };
+
+      const { error } = await window.db.from('solicitudes').insert([formData]);
+      if (error) {
+        alert('Error al enviar: ' + error.message);
+        btn.textContent = 'Enviar solicitud →'; btn.disabled = false;
+      } else {
+        document.getElementById('form-cliente').classList.add('hidden');
+        document.getElementById('mensaje-exito').classList.remove('hidden');
+      }
+    });
+  </script>
 </body>
 </html>
