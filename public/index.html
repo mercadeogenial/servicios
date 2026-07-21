@@ -1,51 +1,85 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ServiExpress — Servicios para tu hogar u oficina en Santa Cruz</title>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,600;9..144,900&family=Archivo:wght@400;500;600;700&display=swap');
-  :root{ --rust:#c1502e; --ink:#1c1a17; --paper:#f4ede2; --paper-warm:#ece2d2; --teal:#1f4741; }
-  *{box-sizing:border-box; margin:0; padding:0;}
-  body{background:var(--paper); color:var(--ink); font-family:'Archivo',sans-serif; line-height:1.55; padding:0 6vw 60px;}
-  h1{font-family:'Fraunces',serif; font-weight:900; font-size:clamp(2rem,5vw,3.2rem); margin:48px 0 10px; max-width:16ch;}
-  p.lede{color:#4a453d; font-size:1.1rem; max-width:56ch; margin-bottom:14px;}
-  .trust{display:flex; flex-wrap:wrap; gap:8px 18px; color:var(--teal); font-weight:600; font-size:0.9rem; margin:18px 0 34px;}
-  .cards{display:grid; grid-template-columns:1fr 1fr; gap:20px; max-width:760px;}
-  @media(max-width:560px){ .cards{grid-template-columns:1fr;} }
-  .cta{display:block; text-decoration:none; color:var(--ink); background:var(--paper-warm); border:2px solid var(--ink); border-radius:18px; padding:28px; box-shadow:6px 6px 0 var(--ink); transition:transform .08s, box-shadow .08s;}
-  .cta:hover{transform:translate(-2px,-2px); box-shadow:8px 8px 0 var(--ink);}
-  .cta h2{font-family:'Fraunces',serif; font-weight:900; font-size:1.4rem; margin-bottom:6px;}
-  .cta.prov{background:var(--teal); color:#fff; box-shadow:6px 6px 0 var(--ink);}
-  .cta.prov h2{color:#fff;}
-  .cta .arrow{margin-top:14px; font-weight:700;}
-  footer{margin-top:44px; font-size:0.8rem; color:#7a7264;}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ServiExpress — Servicios para tu hogar u oficina en Santa Cruz</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
-  <h1>Servicios para tu hogar u oficina, sin vueltas.</h1>
-  <p class="lede">Conectamos hogares, oficinas y pequeñas empresas de Santa Cruz de la Sierra con proveedores verificados: plomería, electricidad, limpieza, jardinería, pintura, aire acondicionado y más.</p>
-  <div class="trust">
-    <span>✓ Proveedores verificados</span>
-    <span>✓ Precios transparentes</span>
-    <span>✓ Reseñas reales</span>
-    <span>✓ Coordinación por WhatsApp</span>
-  </div>
+<body class="bg-gray-50 text-gray-800 font-sans">
+  
+  <header class="bg-blue-900 text-white shadow-md">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+      <div class="flex items-center gap-2">
+        <i class="fas fa-tools text-2xl text-yellow-400"></i>
+        <h1 class="text-2xl font-bold tracking-tight">ServiExpress</h1>
+      </div>
+      <nav class="hidden md:flex gap-6 text-sm font-medium">
+        <a href="#como-funciona" class="hover:text-yellow-400 transition">Cómo funciona</a>
+        <a href="proveedor.html" class="hover:text-yellow-400 transition">Soy Proveedor</a>
+      </nav>
+    </div>
+  </header>
 
-  <div class="cards">
-    <a class="cta" href="cliente.html">
-      <h2>Necesito un servicio</h2>
-      <p>Contanos qué necesitás y te derivamos con un proveedor verificado.</p>
-      <div class="arrow">Solicitar un servicio →</div>
-    </a>
-    <a class="cta prov" href="proveedor.html">
-      <h2>Ofrezco servicios</h2>
-      <p>Registro gratuito. Pagás Bs 5 solo cuando aceptás una solicitud.</p>
-      <div class="arrow">Sumarme como proveedor →</div>
-    </a>
-  </div>
+  <section class="bg-gradient-to-br from-blue-900 to-blue-800 text-white py-20 px-6">
+    <div class="max-w-4xl mx-auto text-center">
+      <h2 class="text-4xl md:text-5xl font-extrabold mb-6 leading-tight">Servicios para tu hogar u oficina, <span class="text-yellow-400">sin vueltas.</span></h2>
+      <p class="text-xl text-blue-100 mb-10 max-w-2xl mx-auto">
+        Conectamos hogares, oficinas y pequeñas empresas de Santa Cruz de la Sierra con proveedores verificados: plomería, electricidad, limpieza, jardinería, pintura, aire acondicionado y más.
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="cliente.html" class="bg-yellow-400 text-blue-900 font-bold py-4 px-8 rounded-lg shadow-lg hover:bg-yellow-300 transition transform hover:-translate-y-1 flex items-center justify-center gap-2">
+          <i class="fas fa-search"></i> Necesito un servicio
+        </a>
+        <a href="proveedor.html" class="bg-transparent border-2 border-white text-white font-bold py-4 px-8 rounded-lg hover:bg-white hover:text-blue-900 transition transform hover:-translate-y-1 flex items-center justify-center gap-2">
+          <i class="fas fa-briefcase"></i> Ofrezco servicios
+        </a>
+      </div>
+      <div class="mt-12 flex flex-wrap justify-center gap-6 text-sm font-medium text-blue-200">
+        <span class="flex items-center gap-2"><i class="fas fa-check-circle text-yellow-400"></i> Proveedores verificados</span>
+        <span class="flex items-center gap-2"><i class="fas fa-check-circle text-yellow-400"></i> Precios transparentes</span>
+        <span class="flex items-center gap-2"><i class="fas fa-check-circle text-yellow-400"></i> Reseñas reales</span>
+        <span class="flex items-center gap-2"><i class="fab fa-whatsapp text-yellow-400"></i> Coordinación por WhatsApp</span>
+      </div>
+    </div>
+  </section>
 
-  <footer>ServiExpress · Santa Cruz de la Sierra, Bolivia</footer>
+  <section id="como-funciona" class="py-16 px-6 max-w-6xl mx-auto">
+    <h3 class="text-3xl font-bold text-center text-blue-900 mb-12">¿Cómo funciona?</h3>
+    <div class="grid md:grid-cols-3 gap-8">
+      <div class="bg-white p-8 rounded-xl shadow-sm border border-gray-100 text-center">
+        <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-2xl mx-auto mb-4 font-bold">1</div>
+        <h4 class="text-xl font-bold mb-3">Solicitá tu servicio</h4>
+        <p class="text-gray-600">Contanos qué necesitás y te derivamos con un proveedor verificado en tu zona.</p>
+      </div>
+      <div class="bg-white p-8 rounded-xl shadow-sm border border-gray-100 text-center">
+        <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-2xl mx-auto mb-4 font-bold">2</div>
+        <h4 class="text-xl font-bold mb-3">Coordinación directa</h4>
+        <p class="text-gray-600">Una vez gestionado el contacto, acordás los detalles y el precio directamente con el profesional.</p>
+      </div>
+      <div class="bg-white p-8 rounded-xl shadow-sm border border-gray-100 text-center">
+        <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-2xl mx-auto mb-4 font-bold">3</div>
+        <h4 class="text-xl font-bold mb-3">Trabajo garantizado</h4>
+        <p class="text-gray-600">El profesional realiza el trabajo. Vos pagás directamente a él por el servicio acordado.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="bg-gray-900 text-gray-400 py-10 px-6 mt-12">
+    <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+      <div class="flex items-center gap-2">
+        <i class="fas fa-tools text-yellow-400"></i>
+        <span class="text-white font-bold text-lg">ServiExpress</span>
+      </div>
+      <div class="text-sm text-center md:text-right">
+        <p>© 2024 ServiExpress. Santa Cruz de la Sierra, Bolivia.</p>
+        <div class="mt-2 space-x-4">
+          <a href="terminos-clientes.html" class="hover:text-white transition">Términos para Clientes</a>
+          <a href="terminos-proveedores.html" class="hover:text-white transition">Términos para Proveedores</a>
+        </div>
+      </div>
+    </div>
+  </footer>
 </body>
 </html>
