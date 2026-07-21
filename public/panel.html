@@ -1,518 +1,614 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ServiExpress — Panel del operador</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,600;9..144,900&family=Archivo:wght@400;500;600;700&display=swap');
-  :root{ --rust:#c1502e; --rust-dark:#9c3d20; --ink:#1c1a17; --paper:#f4ede2; --paper-warm:#ece2d2; --teal:#1f4741; --line:#d8cbb3; --ok:#3d7a4f;}
-  *{box-sizing:border-box; margin:0; padding:0;}
-  body{background:var(--paper); color:var(--ink); font-family:'Archivo',sans-serif;}
-  h1,h2,h3{font-family:'Fraunces',serif; font-weight:900;}
-  header{display:flex; justify-content:space-between; align-items:center; padding:20px 4vw; border-bottom:2px solid var(--ink);}
-  header h1{font-size:1.4rem;}
-  #logoutBtn{background:none; border:2px solid var(--ink); border-radius:8px; padding:8px 16px; cursor:pointer; font-weight:600;}
-  main{padding:24px 4vw 60px;}
-  .tabs{display:flex; gap:0; border:2px solid var(--ink); border-radius:12px; overflow:hidden; max-width:720px; margin-bottom:24px;}
-  .tab{flex:1; padding:12px 6px; text-align:center; cursor:pointer; font-weight:700; background:transparent; border:none; font-size:0.9rem;}
-  .tab.active{background:var(--ink); color:var(--paper);}
-  .tab:not(:last-child){border-right:2px solid var(--ink);}
-  .panel{display:none;} .panel.active{display:block;}
-  .req-card{background:var(--paper-warm); border:2px solid var(--ink); border-radius:14px; padding:20px; margin-bottom:16px;}
-  .req-head{display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:8px;}
-  .badge{font-size:0.72rem; text-transform:uppercase; font-weight:700; padding:4px 10px; border-radius:100px; background:var(--teal); color:#fff;}
-  .badge.prioridad{background:var(--rust);}
-  .badge.off{background:#999;}
-  .req-body{margin-top:10px; font-size:0.92rem;}
-  .req-actions{margin-top:14px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;}
-  button.act{border:2px solid var(--ink); border-radius:8px; padding:8px 14px; background:#fff; cursor:pointer; font-weight:600; font-size:0.85rem;}
-  button.act.primary{background:var(--rust); color:#fff;}
-  button.act.ok{background:var(--ok); color:#fff;}
-  button.act.ghost{background:transparent;}
-  button.act.danger{background:#b03a2e; color:#fff;}
-  select.inline, input.inline{border:2px solid var(--ink); border-radius:8px; padding:7px 10px; font-family:'Archivo',sans-serif; font-size:0.85rem;}
-  .prov-select{margin-top:10px; display:flex; flex-wrap:wrap; gap:6px;}
-  .prov-chip{border:2px solid var(--teal); color:var(--teal); border-radius:100px; padding:6px 12px; font-size:0.8rem; cursor:pointer;}
-  .prov-chip.selected{background:var(--teal); color:#fff;}
-  .contacto-row{display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-top:1px dashed var(--line); font-size:0.85rem;}
-  .fotos-row{display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;}
-  .fotos-row a img{width:64px; height:64px; object-fit:cover; border-radius:8px; border:2px solid var(--ink); display:block;}
-  table{width:100%; border-collapse:collapse; margin-top:12px;}
-  th,td{text-align:left; padding:8px; border-bottom:1px solid var(--line); font-size:0.85rem; vertical-align:top;}
-  #loginBox{max-width:360px; margin:80px auto; background:var(--paper-warm); border:2px solid var(--ink); border-radius:14px; padding:28px;}
-  #loginBox input{width:100%; padding:10px; margin-top:6px; margin-bottom:14px; border:2px solid var(--ink); border-radius:8px;}
-  #loginBox button{width:100%; padding:12px; background:var(--ink); color:var(--paper); border:none; border-radius:8px; font-weight:700; cursor:pointer;}
-  #appWrap{display:none;}
-
-  .cobro-box{margin-top:14px; padding:14px; border:2px dashed var(--teal); border-radius:12px; background:#fff;}
-  .cobro-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:8px;}
-  .cobro-grid label{font-size:0.72rem; text-transform:uppercase; font-weight:700; color:var(--teal); display:block; margin-bottom:4px;}
-  .cobro-grid .full{grid-column:1 / -1;}
-  .check-row{display:flex; align-items:center; gap:8px; margin-top:8px; font-size:0.85rem;}
-
-  .info-box{background:#fff3cd; border:2px solid var(--rust); border-radius:12px; padding:16px; margin-bottom:20px; font-size:0.88rem; max-width:720px;}
-  .info-box b{color:var(--rust-dark);}
-
-  .modal-overlay{display:none; position:fixed; inset:0; background:rgba(28,26,23,0.6); z-index:100; align-items:center; justify-content:center; padding:20px;}
-  .modal-overlay.open{display:flex;}
-  .modal{background:var(--paper); border:2px solid var(--ink); border-radius:16px; padding:28px; max-width:520px; width:100%; max-height:88vh; overflow-y:auto; box-shadow:10px 10px 0 var(--ink);}
-  .modal h3{margin-bottom:16px;}
-  .modal label{display:block; font-size:0.78rem; font-weight:700; text-transform:uppercase; color:var(--teal); margin:14px 0 5px;}
-  .modal label:first-of-type{margin-top:0;}
-  .modal input, .modal select, .modal textarea{width:100%; padding:10px 12px; border:2px solid var(--ink); border-radius:8px; font-family:'Archivo',sans-serif;}
-  .modal-actions{display:flex; gap:10px; margin-top:22px; justify-content:flex-end;}
-
-  .config-card{background:var(--paper-warm); border:2px solid var(--ink); border-radius:14px; padding:24px; max-width:480px;}
-  .config-card label{display:block; font-size:0.78rem; font-weight:700; text-transform:uppercase; color:var(--teal); margin:14px 0 5px;}
-  .config-card label:first-of-type{margin-top:0;}
-  .config-card input, .config-card select{width:100%; padding:10px 12px; border:2px solid var(--ink); border-radius:8px;}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel de Operador | ServiExpress</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
+<body class="bg-gray-50 text-gray-800">
 
-<div id="loginBox">
-  <h2 style="margin-bottom:16px;">Panel operador</h2>
-  <label>Email</label><input id="loginEmail" type="email">
-  <label>Contraseña</label><input id="loginPass" type="password">
-  <button id="loginBtn">Entrar</button>
-  <p id="loginError" style="color:var(--rust); margin-top:10px; font-size:0.85rem;"></p>
-</div>
-
-<div id="appWrap">
-  <header>
-    <h1>ServiExpress · Panel</h1>
-    <button id="logoutBtn">Salir</button>
-  </header>
-  <main>
-    <div class="tabs">
-      <button class="tab active" data-tab="solicitudes">Solicitudes</button>
-      <button class="tab" data-tab="proveedores">Proveedores</button>
-      <button class="tab" data-tab="clientes">Clientes</button>
-      <button class="tab" data-tab="configuracion">Configuración</button>
+  <!-- Login Screen -->
+  <div id="login-screen" class="fixed inset-0 bg-blue-900 flex items-center justify-center z-50">
+    <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
+      <h2 class="text-2xl font-bold text-center text-blue-900 mb-6">Acceso Operador ServiExpress</h2>
+      <input type="email" id="login-email" placeholder="Correo electrónico" class="w-full p-3 border rounded mb-4">
+      <input type="password" id="login-password" placeholder="Contraseña" class="w-full p-3 border rounded mb-6">
+      <button onclick="login()" class="w-full bg-blue-600 text-white p-3 rounded font-bold hover:bg-blue-700">Ingresar</button>
+      <p id="login-error" class="text-red-600 text-sm mt-3 text-center hidden"></p>
     </div>
+  </div>
 
-    <div class="panel active" id="panel-solicitudes"><div id="listaSolicitudes">Cargando…</div></div>
+  <!-- Main App (Hidden until login) -->
+  <div id="main-app" class="hidden min-h-screen flex flex-col">
+    <!-- Header -->
+    <header class="bg-blue-900 text-white p-4 shadow-md flex justify-between items-center">
+      <h1 class="text-xl font-bold"><i class="fas fa-tools mr-2"></i>ServiExpress - Panel de Control</h1>
+      <button onclick="logout()" class="text-sm bg-red-600 px-4 py-2 rounded hover:bg-red-700">Cerrar Sesión</button>
+    </header>
 
-    <div class="panel" id="panel-proveedores">
-      <div id="listaProveedores">Cargando…</div>
-    </div>
+    <!-- Navigation Tabs -->
+    <nav class="bg-white shadow flex overflow-x-auto">
+      <button onclick="showTab('dashboard')" class="tab-btn px-6 py-4 font-semibold text-blue-900 border-b-2 border-blue-900" data-tab="dashboard">📊 Dashboard</button>
+      <button onclick="showTab('solicitudes')" class="tab-btn px-6 py-4 font-semibold text-gray-600 hover:text-blue-900" data-tab="solicitudes">📋 Solicitudes</button>
+      <button onclick="showTab('cobros')" class="tab-btn px-6 py-4 font-semibold text-gray-600 hover:text-blue-900" data-tab="cobros">💰 Cobros</button>
+      <button onclick="showTab('proveedores')" class="tab-btn px-6 py-4 font-semibold text-gray-600 hover:text-blue-900" data-tab="proveedores">👷 Proveedores</button>
+      <button onclick="showTab('catalogo')" class="tab-btn px-6 py-4 font-semibold text-gray-600 hover:text-blue-900" data-tab="catalogo">🗂️ Zonas/Categorías</button>
+      <button onclick="showTab('mediaciones')" class="tab-btn px-6 py-4 font-semibold text-gray-600 hover:text-blue-900" data-tab="mediaciones">⚖️ Mediaciones</button>
+      <button onclick="showTab('configuracion')" class="tab-btn px-6 py-4 font-semibold text-gray-600 hover:text-blue-900" data-tab="configuracion">⚙️ Configuración</button>
+    </nav>
 
-    <div class="panel" id="panel-clientes">
-      <div id="listaClientes">Cargando…</div>
-    </div>
-
-    <div class="panel" id="panel-configuracion">
-      <div class="info-box">
-        <b>Sobre "modificar usuarios":</b> los logins del panel (vos y cualquier otro operador) se manejan
-        desde <b>Supabase → Authentication → Users</b>, no desde acá. Es intencional: crear o editar usuarios
-        requiere una clave (service_role) que nunca debe exponerse en una página web pública — cualquiera
-        que abriera el código del navegador podría usarla para borrar toda la base de datos. Si más adelante
-        querés un botón dentro del panel para esto, se puede construir con una función de servidor separada
-        (Netlify Function) que guarde esa clave de forma segura — avisame cuando lo necesites.
-      </div>
-      <h3 style="margin-bottom:14px;">Configuración de cobro por defecto</h3>
-      <div class="config-card">
-        <label>Monto por defecto (Bs)</label>
-        <input id="cfgMonto" type="number" step="0.5" min="0">
-        <label>Quién paga por defecto</label>
-        <select id="cfgResponsable">
-          <option value="proveedor">El proveedor</option>
-          <option value="cliente">El cliente</option>
-          <option value="ambos">Ambos (montos definidos por el operador)</option>
-          <option value="a_eleccion">A elección — se define caso por caso</option>
-        </select>
-        <button class="act primary" id="guardarConfigBtn" style="margin-top:18px;">Guardar configuración</button>
-        <p id="configMsg" style="margin-top:10px; font-size:0.85rem;"></p>
-      </div>
-    </div>
-  </main>
-</div>
-
-<!-- Modal genérico de edición -->
-<div class="modal-overlay" id="modalOverlay">
-  <div class="modal" id="modalContent"></div>
-</div>
-
-<script src="supabase-config.js"></script>
-<script>
-  let proveedoresCache = [];
-  let configuracion = { cobro_monto_default: 10, cobro_responsable_default: 'proveedor' };
-
-  // ---------- AUTH ----------
-  supabaseClient.auth.onAuthStateChange((event, session)=>{
-    if(session){ document.getElementById('loginBox').style.display='none'; document.getElementById('appWrap').style.display='block'; init(); }
-    else{ document.getElementById('loginBox').style.display='block'; document.getElementById('appWrap').style.display='none'; }
-  });
-  document.getElementById('loginBtn').addEventListener('click', async ()=>{
-    const { error } = await supabaseClient.auth.signInWithPassword({
-      email: document.getElementById('loginEmail').value,
-      password: document.getElementById('loginPass').value
-    });
-    if(error) document.getElementById('loginError').textContent = "No se pudo iniciar sesión: " + error.message;
-  });
-  document.getElementById('logoutBtn').addEventListener('click', ()=> supabaseClient.auth.signOut());
-
-  // ---------- TABS ----------
-  document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click', ()=>{
-    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
-    document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
-    t.classList.add('active');
-    document.getElementById('panel-'+t.dataset.tab).classList.add('active');
-    if(t.dataset.tab === 'proveedores') cargarProveedores();
-    if(t.dataset.tab === 'clientes') cargarClientes();
-    if(t.dataset.tab === 'configuracion') cargarConfiguracion();
-  }));
-
-  function init(){ cargarSolicitudes(); cargarProveedoresCache(); cargarConfiguracion(true); }
-
-  // ---------- MODAL genérico ----------
-  function abrirModal(html){
-    document.getElementById('modalContent').innerHTML = html;
-    document.getElementById('modalOverlay').classList.add('open');
-  }
-  function cerrarModal(){ document.getElementById('modalOverlay').classList.remove('open'); }
-  document.getElementById('modalOverlay').addEventListener('click', (e)=>{ if(e.target.id === 'modalOverlay') cerrarModal(); });
-
-  // ============================================================
-  // SOLICITUDES
-  // ============================================================
-  async function cargarSolicitudes(){
-    const { data, error } = await supabaseClient
-      .from('solicitudes')
-      .select(`*, clientes(nombre, whatsapp, direccion_exacta),
-                categorias(nombre), zonas(nombre),
-                solicitud_contactos(id, proveedor_id, respuesta, fecha_envio, fecha_respuesta, proveedores(nombre_razon_social, whatsapp)),
-                cobros(id, monto_proveedor, monto_cliente, responsable, pagado, nota)`)
-      .order('created_at', { ascending: false });
-
-    const box = document.getElementById('listaSolicitudes');
-    if(error){ box.textContent = "Error cargando solicitudes: " + error.message; return; }
-    if(!data.length){ box.textContent = "No hay solicitudes todavía."; return; }
-
-    box.innerHTML = data.map(s => renderSolicitud(s)).join('');
-    data.forEach(s => atarEventos(s));
-  }
-
-  function renderSolicitud(s){
-    const yaContactados = (s.solicitud_contactos || []);
-    const candidatos = proveedoresCache.filter(p => !yaContactados.some(c => c.proveedor_id === p.id));
-    const asignada = s.estado === 'aceptada' || s.estado === 'en_ejecucion' || s.estado === 'completada';
-    const cobro = (s.cobros && s.cobros[0]) || null;
-
-    return `
-      <div class="req-card" data-id="${s.id}">
-        <div class="req-head">
-          <div>
-            <strong>${s.categorias?.nombre || '—'}</strong> · ${s.zonas?.nombre || '—'}
-            ${s.prioridad ? '<span class="badge prioridad">Urgente</span>' : ''}
-            <span class="badge">${s.estado}</span>
+    <!-- Content Area -->
+    <main class="flex-1 p-6 max-w-7xl mx-auto w-full">
+      
+      <!-- DASHBOARD -->
+      <div id="tab-dashboard" class="tab-content">
+        <h2 class="text-2xl font-bold mb-6">Resumen del Día</h2>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div class="bg-white p-6 rounded-lg shadow border-l-4 border-blue-500">
+            <p class="text-gray-500 text-sm">Solicitudes Hoy</p>
+            <p class="text-3xl font-bold" id="stat-solicitudes-hoy">0</p>
           </div>
-          <div style="font-size:0.8rem;">${new Date(s.created_at).toLocaleString('es-BO')}</div>
+          <div class="bg-white p-6 rounded-lg shadow border-l-4 border-green-500">
+            <p class="text-gray-500 text-sm">Tasa de Conversión</p>
+            <p class="text-3xl font-bold" id="stat-conversion">0%</p>
+          </div>
+          <div class="bg-white p-6 rounded-lg shadow border-l-4 border-yellow-500">
+            <p class="text-gray-500 text-sm">Cobros Pendientes</p>
+            <p class="text-3xl font-bold" id="stat-cobros-pendientes">0</p>
+          </div>
+          <div class="bg-white p-6 rounded-lg shadow border-l-4 border-purple-500">
+            <p class="text-gray-500 text-sm">Ingresos Estimados (Bs)</p>
+            <p class="text-3xl font-bold" id="stat-ingresos">0</p>
+          </div>
         </div>
-        <div class="req-body">
-          <div><b>Cliente:</b> ${s.clientes?.nombre} — ${s.clientes?.whatsapp} — ${s.clientes?.direccion_exacta || 'sin dirección'}</div>
-          <div style="margin-top:6px;">${s.descripcion}</div>
-          ${(s.fotos && s.fotos.length) ? `<div class="fotos-row">${s.fotos.map(u=>`<a href="${u}" target="_blank"><img src="${u}" alt="foto"></a>`).join('')}</div>` : ''}
+      </div>
+
+      <!-- SOLICITUDES -->
+      <div id="tab-solicitudes" class="tab-content hidden">
+        <h2 class="text-2xl font-bold mb-4">Gestión de Solicitudes</h2>
+        <div class="bg-white rounded-lg shadow overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead class="bg-gray-100 text-gray-700 text-sm uppercase">
+              <tr>
+                <th class="p-4">Fecha</th>
+                <th class="p-4">Cliente</th>
+                <th class="p-4">Categoría</th>
+                <th class="p-4">Estado</th>
+                <th class="p-4">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tabla-solicitudes" class="text-sm"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- COBROS -->
+      <div id="tab-cobros" class="tab-content hidden">
+        <h2 class="text-2xl font-bold mb-4">Gestión de Cobros</h2>
+        <div class="bg-white rounded-lg shadow overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead class="bg-gray-100 text-gray-700 text-sm uppercase">
+              <tr>
+                <th class="p-4">Solicitud</th>
+                <th class="p-4">Responsable</th>
+                <th class="p-4">Monto (Bs)</th>
+                <th class="p-4">Estado de Pago</th>
+                <th class="p-4">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tabla-cobros" class="text-sm"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- PROVEEDORES -->
+      <div id="tab-proveedores" class="tab-content hidden">
+        <h2 class="text-2xl font-bold mb-4">Proveedores</h2>
+        <div class="bg-white rounded-lg shadow overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead class="bg-gray-100 text-gray-700 text-sm uppercase">
+              <tr>
+                <th class="p-4">Nombre</th>
+                <th class="p-4">WhatsApp</th>
+                <th class="p-4">Categorías</th>
+                <th class="p-4">Estado</th>
+                <th class="p-4">Acción</th>
+              </tr>
+            </thead>
+            <tbody id="tabla-proveedores" class="text-sm"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- CATALOGO -->
+      <div id="tab-catalogo" class="tab-content hidden">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="bg-white p-6 rounded-lg shadow">
+            <h3 class="font-bold text-lg mb-4">Zonas</h3>
+            <ul id="lista-zonas" class="space-y-2 mb-4"></ul>
+            <div class="flex gap-2">
+              <input type="text" id="nueva-zona" placeholder="Nueva zona" class="border p-2 rounded flex-1">
+              <button onclick="agregarZona()" class="bg-blue-600 text-white px-4 py-2 rounded">Agregar</button>
+            </div>
+          </div>
+          <div class="bg-white p-6 rounded-lg shadow">
+            <h3 class="font-bold text-lg mb-4">Categorías</h3>
+            <ul id="lista-categorias" class="space-y-2 mb-4"></ul>
+            <div class="flex gap-2">
+              <input type="text" id="nueva-categoria" placeholder="Nueva categoría" class="border p-2 rounded flex-1">
+              <button onclick="agregarCategoria()" class="bg-blue-600 text-white px-4 py-2 rounded">Agregar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MEDIACIONES -->
+      <div id="tab-mediaciones" class="tab-content hidden">
+        <h2 class="text-2xl font-bold mb-4">Mediaciones y Disputas</h2>
+        <div class="bg-white rounded-lg shadow p-6">
+          <p class="text-gray-600 mb-4">Gestiona las disputas reportadas por clientes o proveedores.</p>
+          <div id="lista-mediaciones" class="space-y-4"></div>
+        </div>
+      </div>
+
+      <!-- CONFIGURACION -->
+      <div id="tab-configuracion" class="tab-content hidden">
+        <h2 class="text-2xl font-bold mb-4">Configuración de la Plataforma</h2>
+        <div class="bg-white p-6 rounded-lg shadow max-w-md">
+          <label class="block text-sm font-bold mb-2">Monto de Comisión por Contacto (Bs)</label>
+          <input type="number" id="config-monto" step="0.01" class="border p-3 rounded w-full mb-4">
+          <button onclick="guardarConfiguracion()" class="bg-green-600 text-white px-6 py-2 rounded font-bold hover:bg-green-700">Guardar Cambios</button>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- MODAL DE GESTIÓN DE SOLICITUD Y COBRO -->
+  <div id="modal-gestion" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+      <div class="p-6 border-b flex justify-between items-center">
+        <h3 class="text-xl font-bold">Gestionar Solicitud y Cobro</h3>
+        <button onclick="cerrarModal()" class="text-gray-500 hover:text-red-600 text-2xl">&times;</button>
+      </div>
+      <div class="p-6 space-y-6">
+        <input type="hidden" id="modal-solicitud-id">
+        <input type="hidden" id="modal-proveedor-id">
+        
+        <!-- Datos Resumen -->
+        <div class="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded">
+          <div>
+            <p class="text-xs text-gray-500 uppercase">Cliente</p>
+            <p class="font-bold" id="modal-cliente-nombre">-</p>
+            <p class="text-sm" id="modal-cliente-ws">-</p>
+          </div>
+          <div>
+            <p class="text-xs text-gray-500 uppercase">Proveedor Asignado</p>
+            <p class="font-bold" id="modal-proveedor-nombre">-</p>
+            <p class="text-sm" id="modal-proveedor-ws">-</p>
+          </div>
         </div>
 
-        ${!asignada ? `
-        <div class="req-actions" style="margin-top:14px;">
-          <select class="inline" data-role="asignacionDirecta">
-            <option value="">Asignar directamente a…</option>
-            ${proveedoresCache.map(p=>`<option value="${p.id}">${p.nombre_razon_social}</option>`).join('')}
-          </select>
-          <button class="act primary" data-action="asignarDirecto">Asignar →</button>
-        </div>
-
-        <div class="prov-select" data-role="candidatos">
-          ${candidatos.map(p => `<div class="prov-chip" data-prov="${p.id}">${p.nombre_razon_social}</div>`).join('') || '<em>No hay más proveedores candidatos para difundir</em>'}
-        </div>
-        <div class="req-actions">
-          <button class="act ghost" data-action="difundir">O enviar a varios seleccionados →</button>
-        </div>` : ''}
-
-        ${yaContactados.length ? `
-        <div style="margin-top:10px;">
-          <b style="font-size:0.8rem;">Contactados:</b>
-          ${yaContactados.map(c => `
-            <div class="contacto-row">
-              <span>${c.proveedores?.nombre_razon_social} (${c.proveedores?.whatsapp})</span>
-              <span>
-                ${c.respuesta === 'pendiente' ? `
-                  <button class="act ok" data-action="aceptar" data-contacto="${c.id}" data-prov="${c.proveedor_id}">Aceptó</button>
-                  <button class="act" data-action="rechazar" data-contacto="${c.id}">Rechazó</button>
-                ` : `<b>${c.respuesta}</b>`}
-              </span>
-            </div>`).join('')}
-        </div>` : ''}
-
-        ${asignada ? `
-        <div class="cobro-box" data-role="cobro">
-          <b style="font-size:0.85rem; color:var(--teal);">Cobro de esta solicitud</b>
-          <div class="cobro-grid">
+        <!-- Sección de Cobro Flexible -->
+        <div class="border p-4 rounded-lg bg-blue-50">
+          <h4 class="font-bold text-blue-900 mb-3"><i class="fas fa-money-bill-wave mr-2"></i>Comisión de Plataforma</h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
-              <label>¿Quién paga?</label>
-              <select class="inline full" data-field="responsable" style="width:100%;">
-                <option value="proveedor" ${cobro?.responsable==='proveedor'?'selected':''}>El proveedor</option>
-                <option value="cliente" ${cobro?.responsable==='cliente'?'selected':''}>El cliente</option>
-                <option value="ambos" ${cobro?.responsable==='ambos'?'selected':''}>Ambos</option>
-                <option value="a_eleccion" ${cobro?.responsable==='a_eleccion'?'selected':''}>A elección / a definir</option>
+              <label class="block text-sm font-semibold mb-1">¿Quién paga la comisión?</label>
+              <select id="cobro-responsable" class="w-full border p-2 rounded" onchange="actualizarVistaCobro()">
+                <option value="proveedor">Solo el Proveedor</option>
+                <option value="cliente">Solo el Cliente</option>
+                <option value="ambos">Ambos (50/50 o acordado)</option>
+                <option value="a_eleccion">A elección (se define al pagar)</option>
               </select>
             </div>
-            <div></div>
             <div>
-              <label>Monto proveedor (Bs)</label>
-              <input class="inline" type="number" step="0.5" data-field="monto_proveedor" value="${cobro?.monto_proveedor ?? configuracion.cobro_monto_default}">
-            </div>
-            <div>
-              <label>Monto cliente (Bs)</label>
-              <input class="inline" type="number" step="0.5" data-field="monto_cliente" value="${cobro?.monto_cliente ?? 0}">
-            </div>
-            <div class="full">
-              <label>Nota (opcional)</label>
-              <input class="inline" type="text" data-field="nota" value="${cobro?.nota ?? ''}" placeholder="Ej. acordado por WhatsApp">
+              <label class="block text-sm font-semibold mb-1">Monto Total (Bs)</label>
+              <input type="number" id="cobro-monto" step="0.01" class="w-full border p-2 rounded">
             </div>
           </div>
-          <div class="check-row">
-            <input type="checkbox" data-field="pagado" ${cobro?.pagado ? 'checked':''}> <span>Ya se cobró</span>
+
+          <div class="space-y-3">
+            <label class="flex items-center space-x-3 p-3 bg-white rounded border cursor-pointer">
+              <input type="checkbox" id="cobro-cliente-pagado" class="w-5 h-5 text-blue-600" onchange="actualizarVistaCobro()">
+              <div>
+                <span class="font-bold block">✅ El CLIENTE ya pagó su parte</span>
+                <span class="text-xs text-gray-600">Al marcar esto, se revelará el WhatsApp del PROVEEDOR al cliente.</span>
+              </div>
+            </label>
+            <label class="flex items-center space-x-3 p-3 bg-white rounded border cursor-pointer">
+              <input type="checkbox" id="cobro-proveedor-pagado" class="w-5 h-5 text-green-600" onchange="actualizarVistaCobro()">
+              <div>
+                <span class="font-bold block">✅ El PROVEEDOR ya pagó su parte</span>
+                <span class="text-xs text-gray-600">Al marcar esto, se revelará el WhatsApp del CLIENTE al proveedor.</span>
+              </div>
+            </label>
           </div>
-          <div class="req-actions">
-            <button class="act primary" data-action="guardarCobro">Guardar cobro</button>
+
+          <div class="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded text-sm">
+            <p class="font-bold text-yellow-800 mb-1">📱 Vista Previa de Revelado de Contacto:</p>
+            <div id="vista-previa-contacto" class="space-y-1"></div>
           </div>
-        </div>` : ''}
-      </div>`;
-  }
 
-  function atarEventos(s){
-    const card = document.querySelector(`.req-card[data-id="${s.id}"]`);
-    if(!card) return;
+          <div class="mt-4">
+            <label class="block text-sm font-semibold mb-1">Nota interna (opcional)</label>
+            <textarea id="cobro-nota" rows="2" class="w-full border p-2 rounded" placeholder="Ej: Pago recibido por QR, transferencia, etc."></textarea>
+          </div>
+        </div>
 
-    card.querySelectorAll('.prov-chip').forEach(chip=>{
-      chip.addEventListener('click', ()=> chip.classList.toggle('selected'));
-    });
-
-    const difundirBtn = card.querySelector('[data-action="difundir"]');
-    if(difundirBtn) difundirBtn.addEventListener('click', async ()=>{
-      const seleccionados = Array.from(card.querySelectorAll('.prov-chip.selected')).map(c=>c.dataset.prov);
-      if(!seleccionados.length){ alert("Seleccioná al menos un proveedor."); return; }
-      const rows = seleccionados.map(pid => ({ solicitud_id: s.id, proveedor_id: pid }));
-      await supabaseClient.from('solicitud_contactos').insert(rows);
-      await supabaseClient.from('solicitudes').update({ estado: 'difundida' }).eq('id', s.id);
-      cargarSolicitudes();
-    });
-
-    const asignarBtn = card.querySelector('[data-action="asignarDirecto"]');
-    if(asignarBtn) asignarBtn.addEventListener('click', async ()=>{
-      const provId = card.querySelector('[data-role="asignacionDirecta"]').value;
-      if(!provId){ alert("Elegí un proveedor para asignar directamente."); return; }
-      await asignarProveedor(s.id, provId);
-    });
-
-    card.querySelectorAll('[data-action="aceptar"]').forEach(btn=>{
-      btn.addEventListener('click', async ()=>{
-        const contactoId = btn.dataset.contacto;
-        const provId = btn.dataset.prov;
-        await supabaseClient.from('solicitud_contactos').update({ respuesta: 'aceptado', fecha_respuesta: new Date().toISOString() }).eq('id', contactoId);
-        await supabaseClient.from('solicitud_contactos').update({ respuesta: 'sin_respuesta' }).eq('solicitud_id', s.id).neq('id', contactoId).eq('respuesta','pendiente');
-        await asignarProveedor(s.id, provId);
-      });
-    });
-    card.querySelectorAll('[data-action="rechazar"]').forEach(btn=>{
-      btn.addEventListener('click', async ()=>{
-        await supabaseClient.from('solicitud_contactos').update({ respuesta: 'rechazado', fecha_respuesta: new Date().toISOString() }).eq('id', btn.dataset.contacto);
-        cargarSolicitudes();
-      });
-    });
-
-    const guardarCobroBtn = card.querySelector('[data-action="guardarCobro"]');
-    if(guardarCobroBtn) guardarCobroBtn.addEventListener('click', async ()=>{
-      const cobroBox = card.querySelector('[data-role="cobro"]');
-      const payload = {
-        solicitud_id: s.id,
-        proveedor_id: s.proveedor_asignado_id,
-        responsable: cobroBox.querySelector('[data-field="responsable"]').value,
-        monto_proveedor: parseFloat(cobroBox.querySelector('[data-field="monto_proveedor"]').value) || 0,
-        monto_cliente: parseFloat(cobroBox.querySelector('[data-field="monto_cliente"]').value) || 0,
-        nota: cobroBox.querySelector('[data-field="nota"]').value,
-        pagado: cobroBox.querySelector('[data-field="pagado"]').checked
-      };
-      const { error } = await supabaseClient.from('cobros').upsert(payload, { onConflict: 'solicitud_id' });
-      if(error){ alert("No se pudo guardar el cobro: " + error.message); return; }
-      cargarSolicitudes();
-    });
-  }
-
-  // Asigna un proveedor a una solicitud (desde difusión-aceptar o asignación directa)
-  // y crea el registro de cobro inicial con los valores por defecto de Configuración.
-  async function asignarProveedor(solicitudId, proveedorId){
-    await supabaseClient.from('solicitudes').update({
-      estado: 'aceptada', proveedor_asignado_id: proveedorId, fecha_aceptacion: new Date().toISOString()
-    }).eq('id', solicitudId);
-
-    await supabaseClient.from('cobros').upsert({
-      solicitud_id: solicitudId,
-      proveedor_id: proveedorId,
-      responsable: configuracion.cobro_responsable_default,
-      monto_proveedor: configuracion.cobro_responsable_default === 'cliente' ? 0 : configuracion.cobro_monto_default,
-      monto_cliente: configuracion.cobro_responsable_default === 'cliente' ? configuracion.cobro_monto_default : 0
-    }, { onConflict: 'solicitud_id' });
-
-    cargarSolicitudes();
-  }
-
-  // ============================================================
-  // PROVEEDORES (con edición completa)
-  // ============================================================
-  async function cargarProveedoresCache(){
-    const { data } = await supabaseClient.from('proveedores').select('id, nombre_razon_social').eq('activo', true);
-    proveedoresCache = data || [];
-  }
-
-  async function cargarProveedores(){
-    const { data, error } = await supabaseClient.from('proveedores').select('*, proveedor_categorias(categorias(nombre)), proveedor_zonas(zonas(nombre))').order('created_at', {ascending:false});
-    const box = document.getElementById('listaProveedores');
-    if(error){ box.textContent = "Error: " + error.message; return; }
-    box.innerHTML = `
-      <table>
-        <tr><th>Nombre</th><th>WhatsApp</th><th>Categorías</th><th>Zonas</th><th>Cobro pref.</th><th>Estado</th><th></th></tr>
-        ${data.map(p => `
-          <tr>
-            <td>${p.nombre_razon_social}</td>
-            <td>${p.whatsapp}</td>
-            <td>${(p.proveedor_categorias||[]).map(c=>c.categorias?.nombre).join(', ')}</td>
-            <td>${(p.proveedor_zonas||[]).map(z=>z.zonas?.nombre).join(', ')}</td>
-            <td>${p.metodo_cobro || '—'}</td>
-            <td><span class="badge ${p.activo ? '' : 'off'}">${p.activo ? 'Activo' : 'Inactivo'}</span></td>
-            <td><button class="act" data-editar-prov="${p.id}">Editar</button></td>
-          </tr>`).join('')}
-      </table>`;
-    box.querySelectorAll('[data-editar-prov]').forEach(btn=>{
-      const prov = data.find(p => p.id === btn.dataset.editarProv);
-      btn.addEventListener('click', ()=> abrirModalProveedor(prov));
-    });
-  }
-
-  function abrirModalProveedor(p){
-    abrirModal(`
-      <h3>Editar proveedor</h3>
-      <label>Nombre / razón social</label><input id="mNombre" value="${p.nombre_razon_social || ''}">
-      <label>WhatsApp</label><input id="mWhatsapp" value="${p.whatsapp || ''}">
-      <label>Años de experiencia</label><input id="mExperiencia" type="number" value="${p.anos_experiencia || ''}">
-      <label>Modo de trabajo</label>
-      <select id="mModo">
-        ${['Solo','Con 1-2 ayudantes','Con equipo de 3 o más'].map(v=>`<option value="${v}" ${p.modo_trabajo===v?'selected':''}>${v}</option>`).join('')}
-      </select>
-      <label>Situación tributaria</label>
-      <select id="mTributaria">
-        ${['Régimen Simplificado (RTS)','Régimen General','No tengo registro tributario actualmente','Prefiero no decir'].map(v=>`<option value="${v}" ${p.situacion_tributaria===v?'selected':''}>${v}</option>`).join('')}
-      </select>
-      <label>Método de cobro</label>
-      <select id="mCobro">
-        ${['QR Simple (banco)','Tigo Money','Ambos'].map(v=>`<option value="${v}" ${p.metodo_cobro===v?'selected':''}>${v}</option>`).join('')}
-      </select>
-      <label>Disponibilidad</label><input id="mDisponibilidad" value="${p.disponibilidad || ''}">
-      <label style="display:flex; align-items:center; gap:8px; margin-top:14px;">
-        <input type="checkbox" id="mActivo" ${p.activo ? 'checked':''} style="width:auto;"> Proveedor activo
-      </label>
-      <div class="modal-actions">
-        <button class="act" onclick="cerrarModal()">Cancelar</button>
-        <button class="act primary" id="guardarProvBtn">Guardar</button>
+        <div class="flex justify-end gap-3 pt-4 border-t">
+          <button onclick="cerrarModal()" class="px-4 py-2 border rounded hover:bg-gray-100">Cancelar</button>
+          <button onclick="guardarCobroYDatos()" class="px-6 py-2 bg-blue-600 text-white rounded font-bold hover:bg-blue-700 shadow">
+            <i class="fas fa-save mr-2"></i>Guardar Cobro y Actualizar
+          </button>
+        </div>
       </div>
-    `);
-    document.getElementById('guardarProvBtn').addEventListener('click', async ()=>{
-      const { error } = await supabaseClient.from('proveedores').update({
-        nombre_razon_social: document.getElementById('mNombre').value,
-        whatsapp: document.getElementById('mWhatsapp').value,
-        anos_experiencia: parseInt(document.getElementById('mExperiencia').value) || null,
-        modo_trabajo: document.getElementById('mModo').value,
-        situacion_tributaria: document.getElementById('mTributaria').value,
-        metodo_cobro: document.getElementById('mCobro').value,
-        disponibilidad: document.getElementById('mDisponibilidad').value,
-        activo: document.getElementById('mActivo').checked
-      }).eq('id', p.id);
-      if(error){ alert("No se pudo guardar: " + error.message); return; }
-      cerrarModal();
-      cargarProveedores();
-      cargarProveedoresCache();
-    });
-  }
+    </div>
+  </div>
 
-  // ============================================================
-  // CLIENTES (nuevo — listar y editar)
-  // ============================================================
-  async function cargarClientes(){
-    const { data, error } = await supabaseClient.from('clientes').select('*, zonas(nombre)').order('created_at', {ascending:false});
-    const box = document.getElementById('listaClientes');
-    if(error){ box.textContent = "Error: " + error.message; return; }
-    box.innerHTML = `
-      <table>
-        <tr><th>Nombre</th><th>WhatsApp</th><th>Zona</th><th>Dirección</th><th></th></tr>
-        ${data.map(c => `
-          <tr>
-            <td>${c.nombre}</td>
-            <td>${c.whatsapp}</td>
-            <td>${c.zonas?.nombre || '—'}</td>
-            <td>${c.direccion_exacta || '—'}</td>
-            <td><button class="act" data-editar-cli="${c.id}">Editar</button></td>
-          </tr>`).join('')}
-      </table>`;
-    box.querySelectorAll('[data-editar-cli]').forEach(btn=>{
-      const cli = data.find(c => c.id === btn.dataset.editarCli);
-      btn.addEventListener('click', ()=> abrirModalCliente(cli));
-    });
-  }
+  <script src="supabase-config.js"></script>
+  <script>
+    // Inicialización de Supabase
+    const supabaseUrl = window.SUPABASE_URL; // Asegúrate que tu supabase-config.js exporte estas variables
+    const supabaseKey = window.SUPABASE_ANON_KEY;
+    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-  function abrirModalCliente(c){
-    abrirModal(`
-      <h3>Editar cliente</h3>
-      <label>Nombre completo</label><input id="mcNombre" value="${c.nombre || ''}">
-      <label>WhatsApp</label><input id="mcWhatsapp" value="${c.whatsapp || ''}">
-      <label>Dirección exacta</label><input id="mcDireccion" value="${c.direccion_exacta || ''}">
-      <div class="modal-actions">
-        <button class="act" onclick="cerrarModal()">Cancelar</button>
-        <button class="act primary" id="guardarCliBtn">Guardar</button>
-      </div>
-    `);
-    document.getElementById('guardarCliBtn').addEventListener('click', async ()=>{
-      const { error } = await supabaseClient.from('clientes').update({
-        nombre: document.getElementById('mcNombre').value,
-        whatsapp: document.getElementById('mcWhatsapp').value,
-        direccion_exacta: document.getElementById('mcDireccion').value
-      }).eq('id', c.id);
-      if(error){ alert("No se pudo guardar: " + error.message); return; }
-      cerrarModal();
-      cargarClientes();
-    });
-  }
+    let currentUser = null;
+    let montoDefault = 10.00;
 
-  // ============================================================
-  // CONFIGURACIÓN (nuevo)
-  // ============================================================
-  async function cargarConfiguracion(silencioso){
-    const { data, error } = await supabaseClient.from('configuracion').select('*').eq('id', 1).single();
-    if(!error && data){
-      configuracion = data;
-      if(!silencioso){
-        document.getElementById('cfgMonto').value = data.cobro_monto_default;
-        document.getElementById('cfgResponsable').value = data.cobro_responsable_default;
+    // --- AUTENTICACIÓN ---
+    async function checkAuth() {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        currentUser = session.user;
+        document.getElementById('login-screen').classList.add('hidden');
+        document.getElementById('main-app').classList.remove('hidden');
+        cargarDashboard();
+      } else {
+        document.getElementById('login-screen').classList.remove('hidden');
+        document.getElementById('main-app').classList.add('hidden');
       }
     }
-  }
 
-  document.getElementById('guardarConfigBtn').addEventListener('click', async ()=>{
-    const payload = {
-      id: 1,
-      cobro_monto_default: parseFloat(document.getElementById('cfgMonto').value) || 10,
-      cobro_responsable_default: document.getElementById('cfgResponsable').value
-    };
-    const { error } = await supabaseClient.from('configuracion').upsert(payload, { onConflict: 'id' });
-    const msg = document.getElementById('configMsg');
-    if(error){ msg.style.color = 'var(--rust)'; msg.textContent = "Error: " + error.message; return; }
-    configuracion = payload;
-    msg.style.color = 'var(--ok)'; msg.textContent = "✓ Guardado. Se aplicará a los próximos cobros generados automáticamente.";
-  });
-</script>
+    async function login() {
+      const email = document.getElementById('login-email').value;
+      const password = document.getElementById('login-password').value;
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        document.getElementById('login-error').textContent = error.message;
+        document.getElementById('login-error').classList.remove('hidden');
+      } else {
+        checkAuth();
+      }
+    }
+
+    async function logout() {
+      await supabase.auth.signOut();
+      checkAuth();
+    }
+
+    // --- NAVEGACIÓN ---
+    function showTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('text-blue-900', 'border-b-2', 'border-blue-900');
+        btn.classList.add('text-gray-600');
+      });
+      document.querySelector(`[data-tab="${tabId}"]`).classList.add('text-blue-900', 'border-b-2', 'border-blue-900');
+      document.querySelector(`[data-tab="${tabId}"]`).classList.remove('text-gray-600');
+      
+      if (tabId === 'solicitudes') cargarSolicitudes();
+      if (tabId === 'cobros') cargarCobros();
+      if (tabId === 'proveedores') cargarProveedores();
+      if (tabId === 'catalogo') cargarCatalogo();
+      if (tabId === 'mediaciones') cargarMediaciones();
+      if (tabId === 'configuracion') cargarConfiguracion();
+    }
+
+    // --- DASHBOARD ---
+    async function cargarDashboard() {
+      const hoy = new Date().toISOString().split('T')[0];
+      const { count: solicitudesHoy } = await supabase.from('solicitudes').select('*', { count: 'exact', head: true }).gte('created_at', hoy);
+      document.getElementById('stat-solicitudes-hoy').textContent = solicitudesHoy || 0;
+
+      const { data: cobros } = await supabase.from('cobros').select('cliente_pagado, proveedor_pagado, monto_cliente, monto_proveedor');
+      let pendientes = 0, ingresos = 0;
+      if (cobros) {
+        cobros.forEach(c => {
+          if (!c.cliente_pagado && !c.proveedor_pagado) pendientes++;
+          if (c.cliente_pagado) ingresos += parseFloat(c.monto_cliente || 0);
+          if (c.proveedor_pagado) ingresos += parseFloat(c.monto_proveedor || 0);
+        });
+      }
+      document.getElementById('stat-cobros-pendientes').textContent = pendientes;
+      document.getElementById('stat-ingresos').textContent = ingresos.toFixed(2);
+      
+      // Tasa de conversión (aceptadas / difundidas)
+      const { count: aceptadas } = await supabase.from('solicitudes').select('*', { count: 'exact', head: true }).eq('estado', 'aceptada');
+      const { count: difundidas } = await supabase.from('solicitudes').select('*', { count: 'exact', head: true }).in('estado', ['difundida', 'aceptada', 'cotizada', 'pagada', 'en_ejecucion', 'completada']);
+      const tasa = difundidas > 0 ? ((aceptadas / difundidas) * 100).toFixed(1) : 0;
+      document.getElementById('stat-conversion').textContent = tasa + '%';
+    }
+
+    // --- SOLICITUDES Y MODAL DE COBRO ---
+    async function cargarSolicitudes() {
+      const { data, error } = await supabase.from('solicitudes').select(`
+        id, created_at, estado,
+        clientes (nombre, whatsapp),
+        categorias (nombre),
+        proveedores!proveedor_asignado_id (nombre_razon_social, whatsapp)
+      `).order('created_at', { ascending: false });
+
+      const tbody = document.getElementById('tabla-solicitudes');
+      tbody.innerHTML = '';
+      if (data) {
+        data.forEach(s => {
+          const tr = document.createElement('tr');
+          tr.className = 'border-b hover:bg-gray-50';
+          tr.innerHTML = `
+            <td class="p-4">${new Date(s.created_at).toLocaleDateString()}</td>
+            <td class="p-4 font-medium">${s.clientes?.nombre || 'N/A'}</td>
+            <td class="p-4"><span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">${s.categorias?.nombre || 'N/A'}</span></td>
+            <td class="p-4"><span class="px-2 py-1 rounded text-xs font-bold ${getEstadoColor(s.estado)}">${s.estado.toUpperCase()}</span></td>
+            <td class="p-4">
+              <button onclick="abrirModalGestion('${s.id}')" class="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700">Gestionar</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+    }
+
+    function getEstadoColor(estado) {
+      const colores = { pendiente: 'bg-gray-200 text-gray-800', difundida: 'bg-yellow-100 text-yellow-800', aceptada: 'bg-green-100 text-green-800', completada: 'bg-blue-100 text-blue-800' };
+      return colores[estado] || 'bg-gray-100 text-gray-800';
+    }
+
+    async function abrirModalGestion(solicitudId) {
+      document.getElementById('modal-gestion').classList.remove('hidden');
+      document.getElementById('modal-solicitud-id').value = solicitudId;
+
+      // Obtener datos detallados
+      const { data: sol } = await supabase.from('solicitudes').select(`
+        *, clientes (nombre, whatsapp), proveedores!proveedor_asignado_id (id, nombre_razon_social, whatsapp)
+      `).eq('id', solicitudId).single();
+
+      if (sol) {
+        document.getElementById('modal-cliente-nombre').textContent = sol.clientes?.nombre || 'No asignado';
+        document.getElementById('modal-cliente-ws').textContent = sol.clientes?.whatsapp || '-';
+        document.getElementById('modal-proveedor-nombre').textContent = sol.proveedores?.nombre_razon_social || 'No asignado';
+        document.getElementById('modal-proveedor-ws').textContent = sol.proveedores?.whatsapp || '-';
+        document.getElementById('modal-proveedor-id').value = sol.proveedores?.id || '';
+
+        // Cargar cobro existente o defaults
+        const { data: cobro } = await supabase.from('cobros').select('*').eq('solicitud_id', solicitudId).single();
+        
+        document.getElementById('cobro-responsable').value = cobro?.responsable_pago || 'proveedor';
+        document.getElementById('cobro-monto').value = cobro ? (parseFloat(cobro.monto_cliente || 0) + parseFloat(cobro.monto_proveedor || 0)) : montoDefault;
+        document.getElementById('cobro-cliente-pagado').checked = cobro?.cliente_pagado || false;
+        document.getElementById('cobro-proveedor-pagado').checked = cobro?.proveedor_pagado || false;
+        document.getElementById('cobro-nota').value = cobro?.nota || '';
+
+        actualizarVistaCobro();
+      }
+    }
+
+    function cerrarModal() {
+      document.getElementById('modal-gestion').classList.add('hidden');
+    }
+
+    function actualizarVistaCobro() {
+      const clientePago = document.getElementById('cobro-cliente-pagado').checked;
+      const proveedorPago = document.getElementById('cobro-proveedor-pagado').checked;
+      const wsCliente = document.getElementById('modal-cliente-ws').textContent;
+      const wsProveedor = document.getElementById('modal-proveedor-ws').textContent;
+
+      let html = '';
+      if (proveedorPago && wsProveedor !== '-') {
+        html += `<p class="text-green-700 font-semibold"><i class="fab fa-whatsapp mr-1"></i> WhatsApp del Cliente revelado al Proveedor: <a href="https://wa.me/${wsCliente}" target="_blank" class="underline">${wsCliente}</a></p>`;
+      } else {
+        html += `<p class="text-red-600 text-xs">⛔ Proveedor debe pagar para ver el WhatsApp del cliente.</p>`;
+      }
+
+      if (clientePago && wsCliente !== '-') {
+        html += `<p class="text-green-700 font-semibold mt-2"><i class="fab fa-whatsapp mr-1"></i> WhatsApp del Proveedor revelado al Cliente: <a href="https://wa.me/${wsProveedor}" target="_blank" class="underline">${wsProveedor}</a></p>`;
+      } else {
+        html += `<p class="text-red-600 text-xs mt-1">⛔ Cliente debe pagar para ver el WhatsApp del proveedor.</p>`;
+      }
+      document.getElementById('vista-previa-contacto').innerHTML = html;
+    }
+
+    async function guardarCobroYDatos() {
+      const solicitudId = document.getElementById('modal-solicitud-id').value;
+      const proveedorId = document.getElementById('modal-proveedor-id').value;
+      const responsable = document.getElementById('cobro-responsable').value;
+      const montoTotal = parseFloat(document.getElementById('cobro-monto').value) || 0;
+      
+      // Distribuir monto según responsable (lógica simple, ajustable)
+      let montoCliente = 0, montoProveedor = 0;
+      if (responsable === 'cliente') montoCliente = montoTotal;
+      else if (responsable === 'proveedor') montoProveedor = montoTotal;
+      else { montoCliente = montoTotal / 2; montoProveedor = montoTotal / 2; }
+
+      const clientePagado = document.getElementById('cobro-cliente-pagado').checked;
+      const proveedorPagado = document.getElementById('cobro-proveedor-pagado').checked;
+      const nota = document.getElementById('cobro-nota').value;
+
+      if (!proveedorId) {
+        alert('Debes asignar un proveedor a la solicitud antes de gestionar el cobro.');
+        return;
+      }
+
+      const { error } = await supabase.rpc('guardar_cobro', {
+        p_solicitud_id: solicitudId,
+        p_proveedor_id: proveedorId,
+        p_responsable_pago: responsable,
+        p_monto_cliente: montoCliente,
+        p_monto_proveedor: montoProveedor,
+        p_cliente_pagado: clientePagado,
+        p_proveedor_pagado: proveedorPagado,
+        p_nota: nota
+      });
+
+      if (error) {
+        alert('Error al guardar: ' + error.message);
+      } else {
+        alert('Cobro guardado y contactos actualizados correctamente.');
+        cerrarModal();
+        cargarSolicitudes();
+        cargarDashboard();
+      }
+    }
+
+    // --- COBROS ---
+    async function cargarCobros() {
+      const { data } = await supabase.from('cobros').select(`
+        id, responsable_pago, monto_cliente, monto_proveedor, cliente_pagado, proveedor_pagado, nota,
+        solicitudes (id, descripcion),
+        proveedores (nombre_razon_social)
+      `).order('created_at', { ascending: false });
+
+      const tbody = document.getElementById('tabla-cobros');
+      tbody.innerHTML = '';
+      if (data) {
+        data.forEach(c => {
+          const total = (parseFloat(c.monto_cliente) || 0) + (parseFloat(c.monto_proveedor) || 0);
+          const pagado = c.cliente_pagado || c.proveedor_pagado;
+          const tr = document.createElement('tr');
+          tr.className = 'border-b hover:bg-gray-50';
+          tr.innerHTML = `
+            <td class="p-4 text-xs">${c.solicitudes?.id.substring(0,8)}...<br><span class="text-gray-500">${c.proveedores?.nombre_razon_social}</span></td>
+            <td class="p-4 capitalize">${c.responsable_pago.replace('_', ' ')}</td>
+            <td class="p-4 font-bold">Bs ${total.toFixed(2)}</td>
+            <td class="p-4">
+              ${c.cliente_pagado ? '<span class="text-green-600 text-xs">✅ Cliente</span><br>' : '<span class="text-red-500 text-xs">⏳ Cliente</span><br>'}
+              ${c.proveedor_pagado ? '<span class="text-green-600 text-xs">✅ Proveedor</span>' : '<span class="text-red-500 text-xs">⏳ Proveedor</span>'}
+            </td>
+            <td class="p-4">
+              ${!c.proveedor_pagado ? `<button onclick="registrarPagoManual('${c.id}', 'proveedor')" class="text-xs bg-green-600 text-white px-2 py-1 rounded mb-1">Marcar Pagó Prov.</button><br>` : ''}
+              ${!c.cliente_pagado ? `<button onclick="registrarPagoManual('${c.id}', 'cliente')" class="text-xs bg-blue-600 text-white px-2 py-1 rounded">Marcar Pagó Cli.</button>` : ''}
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+    }
+
+    async function registrarPagoManual(cobroId, quien) {
+      const updates = quien === 'proveedor' ? { proveedor_pagado: true } : { cliente_pagado: true };
+      await supabase.from('cobros').update(updates).eq('id', cobroId);
+      cargarCobros();
+      cargarDashboard();
+    }
+
+    // --- PROVEEDORES ---
+    async function cargarProveedores() {
+      const { data } = await supabase.from('proveedores').select('id, nombre_razon_social, whatsapp, activo').order('created_at', { ascending: false });
+      const tbody = document.getElementById('tabla-proveedores');
+      tbody.innerHTML = '';
+      if (data) {
+        data.forEach(p => {
+          const tr = document.createElement('tr');
+          tr.className = 'border-b hover:bg-gray-50';
+          tr.innerHTML = `
+            <td class="p-4 font-medium">${p.nombre_razon_social}</td>
+            <td class="p-4">${p.whatsapp}</td>
+            <td class="p-4 text-xs text-gray-500">Ver en perfil</td>
+            <td class="p-4"><span class="px-2 py-1 rounded text-xs ${p.activo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${p.activo ? 'Activo' : 'Inactivo'}</span></td>
+            <td class="p-4">
+              <button onclick="toggleProveedor('${p.id}', ${!p.activo})" class="text-xs border px-2 py-1 rounded hover:bg-gray-100">
+                ${p.activo ? 'Desactivar' : 'Activar'}
+              </button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+    }
+
+    async function toggleProveedor(id, nuevoEstado) {
+      await supabase.from('proveedores').update({ activo: nuevoEstado }).eq('id', id);
+      cargarProveedores();
+    }
+
+    // --- CATALOGO ---
+    async function cargarCatalogo() {
+      const { data: zonas } = await supabase.from('zonas').select('id, nombre, activa').order('nombre');
+      const { data: categorias } = await supabase.from('categorias').select('id, nombre, activa').order('nombre');
+      
+      document.getElementById('lista-zonas').innerHTML = zonas.map(z => `<li class="flex justify-between items-center bg-gray-50 p-2 rounded"><span>${z.nombre}</span> <button onclick="toggleCatalogo('zonas', '${z.id}', ${!z.activa})" class="text-xs text-blue-600">${z.activa ? 'Desactivar' : 'Activar'}</button></li>`).join('');
+      document.getElementById('lista-categorias').innerHTML = categorias.map(c => `<li class="flex justify-between items-center bg-gray-50 p-2 rounded"><span>${c.nombre}</span> <button onclick="toggleCatalogo('categorias', '${c.id}', ${!c.activa})" class="text-xs text-blue-600">${c.activa ? 'Desactivar' : 'Activar'}</button></li>`).join('');
+    }
+
+    async function agregarZona() {
+      const nombre = document.getElementById('nueva-zona').value;
+      if (nombre) {
+        await supabase.from('zonas').insert({ nombre, activa: true });
+        document.getElementById('nueva-zona').value = '';
+        cargarCatalogo();
+      }
+    }
+
+    async function agregarCategoria() {
+      const nombre = document.getElementById('nueva-categoria').value;
+      if (nombre) {
+        await supabase.from('categorias').insert({ nombre, activa: true });
+        document.getElementById('nueva-categoria').value = '';
+        cargarCatalogo();
+      }
+    }
+
+    async function toggleCatalogo(tabla, id, nuevoEstado) {
+      await supabase.from(tabla).update({ activa: nuevoEstado }).eq('id', id);
+      cargarCatalogo();
+    }
+
+    // --- MEDIACIONES ---
+    async function cargarMediaciones() {
+      const { data } = await supabase.from('mediaciones').select('*, solicitudes (id)').order('created_at', { ascending: false });
+      const container = document.getElementById('lista-mediaciones');
+      container.innerHTML = '';
+      if (data && data.length > 0) {
+        data.forEach(m => {
+          const div = document.createElement('div');
+          div.className = 'border p-4 rounded bg-gray-50';
+          div.innerHTML = `
+            <div class="flex justify-between mb-2">
+              <span class="font-bold text-sm">Solicitud: ${m.solicitudes?.id.substring(0,8)}</span>
+              <span class="text-xs ${m.atendida ? 'text-green-600' : 'text-red-600'}">${m.atendida ? 'Resuelta' : 'Pendiente'}</span>
+            </div>
+            <p class="text-sm mb-2"><strong>Motivo:</strong> ${m.motivo}</p>
+            <p class="text-sm text-gray-600"><strong>Resolución:</strong> ${m.resolucion || 'Sin resolver'}</p>
+          `;
+          container.appendChild(div);
+        });
+      } else {
+        container.innerHTML = '<p class="text-gray-500">No hay mediaciones registradas.</p>';
+      }
+    }
+
+    // --- CONFIGURACION ---
+    async function cargarConfiguracion() {
+      const { data } = await supabase.from('configuracion').select('valor').eq('clave', 'monto_comision_default').single();
+      if (data) {
+        montoDefault = parseFloat(data.valor);
+        document.getElementById('config-monto').value = montoDefault;
+      }
+    }
+
+    async function guardarConfiguracion() {
+      const nuevoMonto = document.getElementById('config-monto').value;
+      await supabase.from('configuracion').upsert({ clave: 'monto_comision_default', valor: nuevoMonto });
+      alert('Configuración guardada. El nuevo monto por defecto será Bs ' + nuevoMonto);
+      montoDefault = parseFloat(nuevoMonto);
+    }
+
+    // Iniciar
+    checkAuth();
+  </script>
 </body>
 </html>
