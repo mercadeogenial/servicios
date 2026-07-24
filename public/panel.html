@@ -4,129 +4,91 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Panel de Operador | ServiExpress</title>
-  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Supabase JS -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="bg-gray-50 text-gray-800 font-sans">
 
-  <!-- ==================== PANTALLA DE LOGIN ==================== -->
+  <!-- PANTALLA DE LOGIN -->
   <div id="login-screen" class="fixed inset-0 bg-blue-900 flex items-center justify-center z-50">
     <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md mx-4">
       <h2 class="text-2xl font-bold text-center text-blue-900 mb-2">ServiExpress</h2>
       <p class="text-center text-gray-500 mb-6 text-sm">Acceso exclusivo para Operadores</p>
-      
       <input type="email" id="login-email" placeholder="Correo electrónico" class="w-full p-3 border border-gray-300 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500">
       <input type="password" id="login-password" placeholder="Contraseña" class="w-full p-3 border border-gray-300 rounded mb-6 focus:outline-none focus:ring-2 focus:ring-blue-500">
-      
-      <button onclick="login()" class="w-full bg-blue-600 text-white p-3 rounded font-bold hover:bg-blue-700 transition duration-200">Ingresar al Panel</button>
+      <button onclick="window.appLogin()" class="w-full bg-blue-600 text-white p-3 rounded font-bold hover:bg-blue-700 transition duration-200">Ingresar al Panel</button>
       <p id="login-error" class="text-red-600 text-sm mt-3 text-center hidden bg-red-50 p-2 rounded"></p>
     </div>
   </div>
 
-  <!-- ==================== APLICACIÓN PRINCIPAL ==================== -->
+  <!-- APLICACIÓN PRINCIPAL -->
   <div id="main-app" class="hidden min-h-screen flex flex-col">
-    
-    <!-- Header -->
     <header class="bg-blue-900 text-white p-4 shadow-md flex justify-between items-center sticky top-0 z-40">
-      <div class="flex items-center gap-3">
-        <i class="fas fa-tools text-xl"></i>
-        <h1 class="text-xl font-bold">ServiExpress - Panel de Control</h1>
-      </div>
-      <button onclick="logout()" class="text-sm bg-red-600 px-4 py-2 rounded hover:bg-red-700 transition duration-200 flex items-center gap-2">
-        <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
-      </button>
+      <div class="flex items-center gap-3"><i class="fas fa-tools text-xl"></i><h1 class="text-xl font-bold">ServiExpress - Panel</h1></div>
+      <button onclick="window.appLogout()" class="text-sm bg-red-600 px-4 py-2 rounded hover:bg-red-700 transition"><i class="fas fa-sign-out-alt"></i> Salir</button>
     </header>
 
-    <!-- Navegación por Pestañas -->
     <nav class="bg-white shadow flex overflow-x-auto border-b border-gray-200">
-      <button onclick="showTab('dashboard')" class="tab-btn px-6 py-4 font-semibold text-blue-900 border-b-2 border-blue-900 whitespace-nowrap" data-tab="dashboard">📊 Dashboard</button>
-      <button onclick="showTab('solicitudes')" class="tab-btn px-6 py-4 font-semibold text-gray-600 hover:text-blue-900 whitespace-nowrap" data-tab="solicitudes">📋 Solicitudes</button>
-      <button onclick="showTab('cobros')" class="tab-btn px-6 py-4 font-semibold text-gray-600 hover:text-blue-900 whitespace-nowrap" data-tab="cobros">💰 Cobros</button>
-      <button onclick="showTab('proveedores')" class="tab-btn px-6 py-4 font-semibold text-gray-600 hover:text-blue-900 whitespace-nowrap" data-tab="proveedores">👷 Proveedores</button>
-      <button onclick="showTab('catalogo')" class="tab-btn px-6 py-4 font-semibold text-gray-600 hover:text-blue-900 whitespace-nowrap" data-tab="catalogo">🗂️ Catálogo</button>
-      <button onclick="showTab('mediaciones')" class="tab-btn px-6 py-4 font-semibold text-gray-600 hover:text-blue-900 whitespace-nowrap" data-tab="mediaciones">⚖️ Mediaciones</button>
-      <button onclick="showTab('configuracion')" class="tab-btn px-6 py-4 font-semibold text-gray-600 hover:text-blue-900 whitespace-nowrap" data-tab="configuracion">⚙️ Configuración</button>
+      <button onclick="window.showTab('dashboard')" class="tab-btn px-6 py-4 font-semibold text-blue-900 border-b-2 border-blue-900 whitespace-nowrap" data-tab="dashboard">📊 Dashboard</button>
+      <button onclick="window.showTab('solicitudes')" class="tab-btn px-6 py-4 font-semibold text-gray-600 hover:text-blue-900 whitespace-nowrap" data-tab="solicitudes">📋 Solicitudes</button>
+      <button onclick="window.showTab('cobros')" class="tab-btn px-6 py-4 font-semibold text-gray-600 hover:text-blue-900 whitespace-nowrap" data-tab="cobros">💰 Cobros</button>
+      <button onclick="window.showTab('proveedores')" class="tab-btn px-6 py-4 font-semibold text-gray-600 hover:text-blue-900 whitespace-nowrap" data-tab="proveedores">👷 Proveedores</button>
+      <button onclick="window.showTab('catalogo')" class="tab-btn px-6 py-4 font-semibold text-gray-600 hover:text-blue-900 whitespace-nowrap" data-tab="catalogo">🗂️ Catálogo</button>
+      <button onclick="window.showTab('mediaciones')" class="tab-btn px-6 py-4 font-semibold text-gray-600 hover:text-blue-900 whitespace-nowrap" data-tab="mediaciones">⚖️ Mediaciones</button>
+      <button onclick="window.showTab('configuracion')" class="tab-btn px-6 py-4 font-semibold text-gray-600 hover:text-blue-900 whitespace-nowrap" data-tab="configuracion">⚙️ Config</button>
     </nav>
 
-    <!-- Área de Contenido -->
     <main class="flex-1 p-6 max-w-7xl mx-auto w-full">
-      
-      <!-- TAB: DASHBOARD -->
+      <!-- Dashboard -->
       <div id="tab-dashboard" class="tab-content">
         <h2 class="text-2xl font-bold mb-6 text-gray-800">Resumen General</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-blue-500">
-            <p class="text-gray-500 text-sm font-medium uppercase">Solicitudes Hoy</p>
-            <p class="text-3xl font-bold text-gray-800 mt-2" id="stat-solicitudes-hoy">0</p>
-          </div>
-          <div class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-green-500">
-            <p class="text-gray-500 text-sm font-medium uppercase">Tasa de Conversión</p>
-            <p class="text-3xl font-bold text-gray-800 mt-2" id="stat-conversion">0%</p>
-          </div>
-          <div class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-yellow-500">
-            <p class="text-gray-500 text-sm font-medium uppercase">Cobros Pendientes</p>
-            <p class="text-3xl font-bold text-gray-800 mt-2" id="stat-cobros-pendientes">0</p>
-          </div>
-          <div class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-purple-500">
-            <p class="text-gray-500 text-sm font-medium uppercase">Ingresos Estimados (Bs)</p>
-            <p class="text-3xl font-bold text-gray-800 mt-2" id="stat-ingresos">0.00</p>
-          </div>
+          <div class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-blue-500"><p class="text-gray-500 text-sm font-medium uppercase">Solicitudes Hoy</p><p class="text-3xl font-bold text-gray-800 mt-2" id="stat-solicitudes-hoy">0</p></div>
+          <div class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-green-500"><p class="text-gray-500 text-sm font-medium uppercase">Tasa de Conversión</p><p class="text-3xl font-bold text-gray-800 mt-2" id="stat-conversion">0%</p></div>
+          <div class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-yellow-500"><p class="text-gray-500 text-sm font-medium uppercase">Cobros Pendientes</p><p class="text-3xl font-bold text-gray-800 mt-2" id="stat-cobros-pendientes">0</p></div>
+          <div class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-purple-500"><p class="text-gray-500 text-sm font-medium uppercase">Ingresos (Bs)</p><p class="text-3xl font-bold text-gray-800 mt-2" id="stat-ingresos">0.00</p></div>
         </div>
       </div>
 
-      <!-- TAB: SOLICITUDES -->
+      <!-- Solicitudes -->
       <div id="tab-solicitudes" class="tab-content hidden">
         <h2 class="text-2xl font-bold mb-4 text-gray-800">Gestión de Solicitudes</h2>
         <div class="bg-white rounded-lg shadow-sm overflow-x-auto border border-gray-200">
           <table class="w-full text-left border-collapse">
-            <thead class="bg-gray-50 text-gray-700 text-xs uppercase tracking-wider">
-              <tr>
-                <th class="p-4 border-b">Fecha</th>
-                <th class="p-4 border-b">Cliente</th>
-                <th class="p-4 border-b">Categoría</th>
-                <th class="p-4 border-b">Estado</th>
-                <th class="p-4 border-b">Acciones</th>
-              </tr>
-            </thead>
+            <thead class="bg-gray-50 text-gray-700 text-xs uppercase tracking-wider"><tr><th class="p-4 border-b">Fecha</th><th class="p-4 border-b">Cliente</th><th class="p-4 border-b">Categoría</th><th class="p-4 border-b">Estado</th><th class="p-4 border-b">Acciones</th></tr></thead>
             <tbody id="tabla-solicitudes" class="text-sm divide-y divide-gray-100"></tbody>
           </table>
         </div>
       </div>
 
-      <!-- TAB: COBROS -->
+      <!-- Cobros -->
       <div id="tab-cobros" class="tab-content hidden">
-        <h2 class="text-2xl font-bold mb-4 text-gray-800">Gestión de Cobros de Plataforma</h2>
+        <h2 class="text-2xl font-bold mb-4 text-gray-800">Gestión de Cobros</h2>
         <div class="bg-white rounded-lg shadow-sm overflow-x-auto border border-gray-200">
           <table class="w-full text-left border-collapse">
-            <thead class="bg-gray-50 text-gray-700 text-xs uppercase tracking-wider">
-              <tr>
-                <th class="p-4 border-b">Solicitud / Proveedor</th>
-                <th class="p-4 border-b">Responsable del Pago</th>
-                <th class="p-4 border-b">Monto Total (Bs)</th>
-                <th class="p-4 border-b">Estado de Pago</th>
-                <th class="p-4 border-b">Acciones</th>
-              </tr>
-            </thead>
+            <thead class="bg-gray-50 text-gray-700 text-xs uppercase tracking-wider"><tr><th class="p-4 border-b">Solicitud / Proveedor</th><th class="p-4 border-b">Responsable</th><th class="p-4 border-b">Monto (Bs)</th><th class="p-4 border-b">Estado</th><th class="p-4 border-b">Acciones</th></tr></thead>
             <tbody id="tabla-cobros" class="text-sm divide-y divide-gray-100"></tbody>
           </table>
         </div>
       </div>
 
-      <!-- TAB: PROVEEDORES -->
+      <!-- Proveedores (MEJORADO) -->
       <div id="tab-proveedores" class="tab-content hidden">
         <h2 class="text-2xl font-bold mb-4 text-gray-800">Directorio de Proveedores</h2>
         <div class="bg-white rounded-lg shadow-sm overflow-x-auto border border-gray-200">
-          <table class="w-full text-left border-collapse">
+          <table class="w-full text-left border-collapse min-w-[1000px]">
             <thead class="bg-gray-50 text-gray-700 text-xs uppercase tracking-wider">
               <tr>
                 <th class="p-4 border-b">Nombre / Razón Social</th>
                 <th class="p-4 border-b">WhatsApp</th>
+                <th class="p-4 border-b">Exp.</th>
+                <th class="p-4 border-b">Categoría</th>
+                <th class="p-4 border-b">Zona</th>
+                <th class="p-4 border-b">Equipo</th>
+                <th class="p-4 border-b">Método Cobro</th>
                 <th class="p-4 border-b">Estado</th>
-                <th class="p-4 border-b">Acción</th>
+                <th class="p-4 border-b">Acciones</th>
               </tr>
             </thead>
             <tbody id="tabla-proveedores" class="text-sm divide-y divide-gray-100"></tbody>
@@ -134,246 +96,197 @@
         </div>
       </div>
 
-      <!-- TAB: CATÁLOGO -->
+      <!-- Catálogo -->
       <div id="tab-catalogo" class="tab-content hidden">
-        <h2 class="text-2xl font-bold mb-6 text-gray-800">Administración de Zonas y Categorías</h2>
+        <h2 class="text-2xl font-bold mb-6 text-gray-800">Zonas y Categorías</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-            <h3 class="font-bold text-lg mb-4 text-blue-900">Zonas de Cobertura</h3>
+            <h3 class="font-bold text-lg mb-4 text-blue-900">Zonas</h3>
             <ul id="lista-zonas" class="space-y-2 mb-4 max-h-60 overflow-y-auto"></ul>
-            <div class="flex gap-2 mt-4">
-              <input type="text" id="nueva-zona" placeholder="Nombre de la nueva zona" class="border border-gray-300 p-2 rounded flex-1 focus:outline-none focus:ring-2 focus:ring-blue-500">
-              <button onclick="agregarZona()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">Agregar</button>
-            </div>
+            <div class="flex gap-2 mt-4"><input type="text" id="nueva-zona" placeholder="Nueva zona" class="border border-gray-300 p-2 rounded flex-1"><button onclick="window.agregarZona()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Agregar</button></div>
           </div>
           <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-            <h3 class="font-bold text-lg mb-4 text-blue-900">Categorías de Servicio</h3>
+            <h3 class="font-bold text-lg mb-4 text-blue-900">Categorías</h3>
             <ul id="lista-categorias" class="space-y-2 mb-4 max-h-60 overflow-y-auto"></ul>
-            <div class="flex gap-2 mt-4">
-              <input type="text" id="nueva-categoria" placeholder="Nombre de la nueva categoría" class="border border-gray-300 p-2 rounded flex-1 focus:outline-none focus:ring-2 focus:ring-blue-500">
-              <button onclick="agregarCategoria()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">Agregar</button>
-            </div>
+            <div class="flex gap-2 mt-4"><input type="text" id="nueva-categoria" placeholder="Nueva categoría" class="border border-gray-300 p-2 rounded flex-1"><button onclick="window.agregarCategoria()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Agregar</button></div>
           </div>
         </div>
       </div>
 
-      <!-- TAB: MEDIACIONES -->
+      <!-- Mediaciones -->
       <div id="tab-mediaciones" class="tab-content hidden">
-        <h2 class="text-2xl font-bold mb-4 text-gray-800">Mediaciones y Disputas</h2>
+        <h2 class="text-2xl font-bold mb-4 text-gray-800">Mediaciones</h2>
         <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-          <p class="text-gray-600 mb-4 text-sm">Gestiona las disputas reportadas por clientes o proveedores. La mediación es a discreción de la plataforma.</p>
           <div id="lista-mediaciones" class="space-y-4"></div>
         </div>
       </div>
 
-      <!-- TAB: CONFIGURACIÓN -->
+      <!-- Configuración -->
       <div id="tab-configuracion" class="tab-content hidden">
-        <h2 class="text-2xl font-bold mb-4 text-gray-800">Configuración de la Plataforma</h2>
+        <h2 class="text-2xl font-bold mb-4 text-gray-800">Configuración</h2>
         <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 max-w-md">
           <label class="block text-sm font-bold mb-2 text-gray-700">Monto de Comisión por Contacto (Bs)</label>
-          <p class="text-xs text-gray-500 mb-3">Este será el valor por defecto que aparecerá al gestionar una nueva solicitud.</p>
-          <input type="number" id="config-monto" step="0.01" class="border border-gray-300 p-3 rounded w-full mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500">
-          <button onclick="guardarConfiguracion()" class="bg-green-600 text-white px-6 py-2 rounded font-bold hover:bg-green-700 transition w-full">Guardar Cambios</button>
+          <input type="number" id="config-monto" step="0.01" class="border border-gray-300 p-3 rounded w-full mb-4">
+          <button onclick="window.guardarConfiguracion()" class="bg-green-600 text-white px-6 py-2 rounded font-bold hover:bg-green-700 w-full">Guardar Cambios</button>
         </div>
       </div>
-
     </main>
   </div>
 
-  <!-- ==================== MODAL DE GESTIÓN ==================== -->
+  <!-- MODAL DE GESTIÓN DE SOLICITUDES (Existente) -->
   <div id="modal-gestion" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 p-4 backdrop-blur-sm">
     <div class="bg-white rounded-lg shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
       <div class="p-6 border-b border-gray-200 flex justify-between items-center bg-gray-50 rounded-t-lg">
         <h3 class="text-xl font-bold text-gray-800">Gestionar Solicitud y Cobro</h3>
-        <button onclick="cerrarModal()" class="text-gray-500 hover:text-red-600 text-2xl transition">&times;</button>
+        <button onclick="window.cerrarModal('modal-gestion')" class="text-gray-500 hover:text-red-600 text-2xl">&times;</button>
       </div>
-      
       <div class="p-6 space-y-6">
         <input type="hidden" id="modal-solicitud-id">
         <input type="hidden" id="modal-proveedor-id">
-        
-        <!-- Resumen de la Solicitud -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-blue-50 p-4 rounded-lg border border-blue-100">
-          <div>
-            <p class="text-xs text-blue-800 uppercase font-bold">Cliente</p>
-            <p class="font-bold text-gray-800" id="modal-cliente-nombre">-</p>
-            <p class="text-sm text-gray-600" id="modal-cliente-ws">-</p>
-          </div>
-          <div>
-            <p class="text-xs text-blue-800 uppercase font-bold">Proveedor Asignado</p>
-            <p class="font-bold text-gray-800" id="modal-proveedor-nombre">-</p>
-            <p class="text-sm text-gray-600" id="modal-proveedor-ws">-</p>
-          </div>
+          <div><p class="text-xs text-blue-800 uppercase font-bold">Cliente</p><p class="font-bold text-gray-800" id="modal-cliente-nombre">-</p><p class="text-sm text-gray-600" id="modal-cliente-ws">-</p></div>
+          <div><p class="text-xs text-blue-800 uppercase font-bold">Proveedor</p><p class="font-bold text-gray-800" id="modal-proveedor-nombre">-</p><p class="text-sm text-gray-600" id="modal-proveedor-ws">-</p></div>
         </div>
-
-        <!-- Sección de Cobro Flexible -->
         <div class="border border-gray-200 p-4 rounded-lg bg-white">
-          <h4 class="font-bold text-blue-900 mb-4 flex items-center gap-2">
-            <i class="fas fa-money-bill-wave"></i> Comisión de Plataforma
-          </h4>
-          
+          <h4 class="font-bold text-blue-900 mb-4 flex items-center gap-2"><i class="fas fa-money-bill-wave"></i> Comisión de Plataforma</h4>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <div>
-              <label class="block text-sm font-semibold mb-1 text-gray-700">¿Quién paga la comisión?</label>
-              <select id="cobro-responsable" class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="actualizarVistaCobro()">
-                <option value="proveedor">Solo el Proveedor</option>
-                <option value="cliente">Solo el Cliente</option>
-                <option value="ambos">Ambos (50/50)</option>
-                <option value="a_eleccion">A elección (se define al pagar)</option>
+            <div><label class="block text-sm font-semibold mb-1 text-gray-700">¿Quién paga?</label>
+              <select id="cobro-responsable" class="w-full border border-gray-300 p-2 rounded" onchange="window.actualizarVistaCobro()">
+                <option value="proveedor">Solo el Proveedor</option><option value="cliente">Solo el Cliente</option><option value="ambos">Ambos (50/50)</option><option value="a_eleccion">A elección</option>
               </select>
             </div>
-            <div>
-              <label class="block text-sm font-semibold mb-1 text-gray-700">Monto Total de Comisión (Bs)</label>
-              <input type="number" id="cobro-monto" step="0.01" class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
-            </div>
+            <div><label class="block text-sm font-semibold mb-1 text-gray-700">Monto Total (Bs)</label><input type="number" id="cobro-monto" step="0.01" class="w-full border border-gray-300 p-2 rounded"></div>
           </div>
-
           <div class="space-y-3 mb-4">
-            <label class="flex items-start space-x-3 p-3 bg-gray-50 rounded border border-gray-200 cursor-pointer hover:bg-gray-100 transition">
-              <input type="checkbox" id="cobro-cliente-pagado" class="mt-1 w-5 h-5 text-blue-600 rounded focus:ring-blue-500" onchange="actualizarVistaCobro()">
-              <div>
-                <span class="font-bold block text-gray-800">✅ El CLIENTE ya pagó su parte</span>
-                <span class="text-xs text-gray-600">Al marcar esto, se revelará el WhatsApp del PROVEEDOR al cliente.</span>
-              </div>
+            <label class="flex items-start space-x-3 p-3 bg-gray-50 rounded border cursor-pointer">
+              <input type="checkbox" id="cobro-cliente-pagado" class="mt-1 w-5 h-5 text-blue-600" onchange="window.actualizarVistaCobro()">
+              <div><span class="font-bold block text-gray-800">✅ CLIENTE pagó</span><span class="text-xs text-gray-600">Revela WhatsApp del Proveedor al Cliente.</span></div>
             </label>
-            
-            <label class="flex items-start space-x-3 p-3 bg-gray-50 rounded border border-gray-200 cursor-pointer hover:bg-gray-100 transition">
-              <input type="checkbox" id="cobro-proveedor-pagado" class="mt-1 w-5 h-5 text-green-600 rounded focus:ring-green-500" onchange="actualizarVistaCobro()">
-              <div>
-                <span class="font-bold block text-gray-800">✅ El PROVEEDOR ya pagó su parte</span>
-                <span class="text-xs text-gray-600">Al marcar esto, se revelará el WhatsApp del CLIENTE al proveedor.</span>
-              </div>
+            <label class="flex items-start space-x-3 p-3 bg-gray-50 rounded border cursor-pointer">
+              <input type="checkbox" id="cobro-proveedor-pagado" class="mt-1 w-5 h-5 text-green-600" onchange="window.actualizarVistaCobro()">
+              <div><span class="font-bold block text-gray-800">✅ PROVEEDOR pagó</span><span class="text-xs text-gray-600">Revela WhatsApp del Cliente al Proveedor.</span></div>
             </label>
           </div>
-
           <div class="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <p class="font-bold text-yellow-800 mb-2 text-sm flex items-center gap-2">
-              <i class="fab fa-whatsapp text-green-600"></i> Vista Previa de Revelado de Contacto:
-            </p>
+            <p class="font-bold text-yellow-800 mb-2 text-sm"><i class="fab fa-whatsapp text-green-600"></i> Vista Previa de Contacto:</p>
             <div id="vista-previa-contacto" class="space-y-2 text-sm"></div>
           </div>
-
-          <div class="mt-4">
-            <label class="block text-sm font-semibold mb-1 text-gray-700">Nota interna (opcional)</label>
-            <textarea id="cobro-nota" rows="2" class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ej: Pago recibido por QR, transferencia, efectivo, etc."></textarea>
-          </div>
+          <div class="mt-4"><label class="block text-sm font-semibold mb-1 text-gray-700">Nota interna</label><textarea id="cobro-nota" rows="2" class="w-full border border-gray-300 p-2 rounded" placeholder="Ej: Pago por QR"></textarea></div>
         </div>
-
         <div class="flex justify-end gap-3 pt-4 border-t border-gray-200">
-          <button onclick="cerrarModal()" class="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-100 transition">Cancelar</button>
-          <button onclick="guardarCobroYDatos()" class="px-6 py-2 bg-blue-600 text-white rounded font-bold hover:bg-blue-700 shadow-md transition flex items-center gap-2">
-            <i class="fas fa-save"></i> Guardar Cobro y Actualizar
-          </button>
+          <button onclick="window.cerrarModal('modal-gestion')" class="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-100">Cancelar</button>
+          <button onclick="window.guardarCobroYDatos()" class="px-6 py-2 bg-blue-600 text-white rounded font-bold hover:bg-blue-700 shadow-md"><i class="fas fa-save"></i> Guardar</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ==================== SCRIPTS ==================== -->
+  <!-- MODAL DE EDICIÓN DE PROVEEDOR (NUEVO) -->
+  <div id="modal-proveedor" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-lg shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+      <div class="p-6 border-b border-gray-200 flex justify-between items-center bg-gray-50 rounded-t-lg">
+        <h3 class="text-xl font-bold text-gray-800">Editar Proveedor</h3>
+        <button onclick="window.cerrarModal('modal-proveedor')" class="text-gray-500 hover:text-red-600 text-2xl">&times;</button>
+      </div>
+      <div class="p-6 space-y-4">
+        <input type="hidden" id="edit-prov-id">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div><label class="block text-sm font-semibold mb-1">Nombre / Razón Social</label><input type="text" id="edit-prov-nombre" class="w-full border border-gray-300 p-2 rounded"></div>
+          <div><label class="block text-sm font-semibold mb-1">WhatsApp</label><input type="text" id="edit-prov-whatsapp" class="w-full border border-gray-300 p-2 rounded"></div>
+          <div><label class="block text-sm font-semibold mb-1">Años de Experiencia</label><input type="number" id="edit-prov-exp" class="w-full border border-gray-300 p-2 rounded"></div>
+          <div><label class="block text-sm font-semibold mb-1">Categoría</label><select id="edit-prov-categoria" class="w-full border border-gray-300 p-2 rounded"></select></div>
+          <div><label class="block text-sm font-semibold mb-1">Zona Principal</label><select id="edit-prov-zona" class="w-full border border-gray-300 p-2 rounded"></select></div>
+          <div><label class="block text-sm font-semibold mb-1">Equipo</label>
+            <select id="edit-prov-equipo" class="w-full border border-gray-300 p-2 rounded">
+              <option value="solo">Solo</option><option value="1-2">Con 1-2 ayudantes</option><option value="3+">Con equipo de 3 o más</option>
+            </select>
+          </div>
+          <div><label class="block text-sm font-semibold mb-1">Método de Cobro</label>
+            <select id="edit-prov-metodo" class="w-full border border-gray-300 p-2 rounded">
+              <option value="qr">QR Simple (banco)</option><option value="tigo">Tigo Money</option><option value="ambos">Ambos</option><option value="efectivo">Efectivo</option>
+            </select>
+          </div>
+          <div><label class="block text-sm font-semibold mb-1">Disponibilidad (Texto libre)</label><input type="text" id="edit-prov-disp" class="w-full border border-gray-300 p-2 rounded" placeholder="Ej: Lunes a Viernes 8-18hs"></div>
+        </div>
+        <div class="flex items-center gap-2 mt-2">
+          <input type="checkbox" id="edit-prov-activo" class="w-5 h-5 text-blue-600 rounded">
+          <label for="edit-prov-activo" class="font-semibold text-gray-700">Proveedor Activo (Puede recibir solicitudes)</label>
+        </div>
+        <div class="flex justify-end gap-3 pt-4 border-t border-gray-200">
+          <button onclick="window.cerrarModal('modal-proveedor')" class="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-100">Cancelar</button>
+          <button onclick="window.guardarProveedor()" class="px-6 py-2 bg-blue-600 text-white rounded font-bold hover:bg-blue-700 shadow-md"><i class="fas fa-save"></i> Guardar Cambios</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCRIPTS -->
   <script src="supabase-config.js"></script>
   <script>
-    // 1. Inicialización segura y única del cliente de Supabase
-    const supabaseUrl = window.SUPABASE_URL;
-    const supabaseKey = window.SUPABASE_ANON_KEY;
+    // 1. Inicialización única y segura
+    window.db = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+    window.montoDefault = 10.00;
 
-    if (!supabaseUrl || !supabaseKey || supabaseUrl.includes('xxxxx')) {
-      console.error("ERROR DE CONFIGURACIÓN: Revisa que 'supabase-config.js' tenga tu URL y ANON KEY reales.");
-      alert("Error de configuración: Faltan credenciales de Supabase.");
-    }
-
-    // Usamos 'supabaseClient' para evitar conflictos con el objeto global del CDN
-    const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
-
-    let currentUser = null;
-    let montoDefault = 10.00;
-
-    // --- AUTENTICACIÓN ---
-    async function checkAuth() {
-      try {
-        const { data: { session }, error } = await supabaseClient.auth.getSession();
-        if (error) throw error;
-        
-        if (session) {
-          currentUser = session.user;
-          document.getElementById('login-screen').classList.add('hidden');
-          document.getElementById('main-app').classList.remove('hidden');
-          cargarDashboard();
-        } else {
-          document.getElementById('login-screen').classList.remove('hidden');
-          document.getElementById('main-app').classList.add('hidden');
-        }
-      } catch (err) {
-        console.error("Error de autenticación:", err);
-        alert("Error al verificar sesión: " + err.message);
-      }
-    }
-
-    async function login() {
+    // 2. Funciones de Autenticación
+    window.appLogin = async function() {
       const email = document.getElementById('login-email').value;
       const password = document.getElementById('login-password').value;
-      
-      if (!email || !password) {
-        alert("Por favor ingresa correo y contraseña");
-        return;
-      }
-
+      if (!email || !password) return alert("Ingresa correo y contraseña");
       const btn = document.querySelector('#login-screen button');
-      const originalText = btn.textContent;
-      btn.textContent = 'Verificando...';
-      btn.disabled = true;
-
-      try {
-        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-        
-        document.getElementById('login-error').classList.add('hidden');
-        checkAuth();
-      } catch (err) {
-        console.error("Error de login:", err);
-        document.getElementById('login-error').textContent = "Error: " + err.message;
+      btn.textContent = 'Verificando...'; btn.disabled = true;
+      const { data, error } = await window.db.auth.signInWithPassword({ email, password });
+      if (error) {
+        document.getElementById('login-error').textContent = "Error: " + error.message;
         document.getElementById('login-error').classList.remove('hidden');
-      } finally {
-        btn.textContent = originalText;
-        btn.disabled = false;
+        btn.textContent = 'Ingresar al Panel'; btn.disabled = false;
+      } else {
+        window.checkAuth();
       }
-    }
+    };
 
-    async function logout() {
-      await supabaseClient.auth.signOut();
+    window.checkAuth = async function() {
+      const { data: { session } } = await window.db.auth.getSession();
+      if (session) {
+        document.getElementById('login-screen').classList.add('hidden');
+        document.getElementById('main-app').classList.remove('hidden');
+        window.cargarDashboard();
+      } else {
+        document.getElementById('login-screen').classList.remove('hidden');
+        document.getElementById('main-app').classList.add('hidden');
+      }
+    };
+
+    window.appLogout = async function() {
+      await window.db.auth.signOut();
       window.location.reload();
-    }
+    };
 
-    // --- NAVEGACIÓN ---
-    function showTab(tabId) {
+    // 3. Navegación
+    window.showTab = function(tabId) {
       document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
       document.getElementById(`tab-${tabId}`).classList.remove('hidden');
-      
       document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.classList.remove('text-blue-900', 'border-b-2', 'border-blue-900');
         btn.classList.add('text-gray-600');
       });
-      
       const activeBtn = document.querySelector(`[data-tab="${tabId}"]`);
-      if (activeBtn) {
-        activeBtn.classList.add('text-blue-900', 'border-b-2', 'border-blue-900');
-        activeBtn.classList.remove('text-gray-600');
-      }
+      if (activeBtn) { activeBtn.classList.add('text-blue-900', 'border-b-2', 'border-blue-900'); activeBtn.classList.remove('text-gray-600'); }
       
-      if (tabId === 'solicitudes') cargarSolicitudes();
-      if (tabId === 'cobros') cargarCobros();
-      if (tabId === 'proveedores') cargarProveedores();
-      if (tabId === 'catalogo') cargarCatalogo();
-      if (tabId === 'mediaciones') cargarMediaciones();
-      if (tabId === 'configuracion') cargarConfiguracion();
-    }
+      if (tabId === 'solicitudes') window.cargarSolicitudes();
+      if (tabId === 'cobros') window.cargarCobros();
+      if (tabId === 'proveedores') window.cargarProveedores();
+      if (tabId === 'catalogo') window.cargarCatalogo();
+      if (tabId === 'mediaciones') window.cargarMediaciones();
+      if (tabId === 'configuracion') window.cargarConfiguracion();
+    };
 
-    // --- DASHBOARD ---
-    async function cargarDashboard() {
+    // 4. Dashboard
+    window.cargarDashboard = async function() {
       const hoy = new Date().toISOString().split('T')[0];
-      const { count: solicitudesHoy } = await supabaseClient.from('solicitudes').select('*', { count: 'exact', head: true }).gte('created_at', hoy);
+      const { count: solicitudesHoy } = await window.db.from('solicitudes').select('*', { count: 'exact', head: true }).gte('created_at', hoy);
       document.getElementById('stat-solicitudes-hoy').textContent = solicitudesHoy || 0;
 
-      const { data: cobros } = await supabaseClient.from('cobros').select('cliente_pagado, proveedor_pagado, monto_cliente, monto_proveedor');
+      const { data: cobros } = await window.db.from('cobros').select('cliente_pagado, proveedor_pagado, monto_cliente, monto_proveedor');
       let pendientes = 0, ingresos = 0;
       if (cobros) {
         cobros.forEach(c => {
@@ -385,59 +298,31 @@
       document.getElementById('stat-cobros-pendientes').textContent = pendientes;
       document.getElementById('stat-ingresos').textContent = ingresos.toFixed(2);
       
-      const { count: aceptadas } = await supabaseClient.from('solicitudes').select('*', { count: 'exact', head: true }).eq('estado', 'aceptada');
-      const { count: difundidas } = await supabaseClient.from('solicitudes').select('*', { count: 'exact', head: true }).in('estado', ['difundida', 'aceptada', 'cotizada', 'pagada', 'en_ejecucion', 'completada']);
+      const { count: aceptadas } = await window.db.from('solicitudes').select('*', { count: 'exact', head: true }).eq('estado', 'aceptada');
+      const { count: difundidas } = await window.db.from('solicitudes').select('*', { count: 'exact', head: true }).in('estado', ['difundida', 'aceptada', 'cotizada', 'pagada', 'en_ejecucion', 'completada']);
       const tasa = difundidas > 0 ? ((aceptadas / difundidas) * 100).toFixed(1) : 0;
       document.getElementById('stat-conversion').textContent = tasa + '%';
-    }
+    };
 
-    // --- SOLICITUDES ---
-    async function cargarSolicitudes() {
-      const { data, error } = await supabaseClient.from('solicitudes').select(`
-        id, created_at, estado,
-        clientes (nombre, whatsapp),
-        categorias (nombre),
-        proveedores!proveedor_asignado_id (nombre_razon_social, whatsapp)
-      `).order('created_at', { ascending: false });
-
-      const tbody = document.getElementById('tabla-solicitudes');
-      tbody.innerHTML = '';
+    // 5. Solicitudes
+    window.cargarSolicitudes = async function() {
+      const { data } = await window.db.from('solicitudes').select(`id, created_at, estado, clientes (nombre, whatsapp), categorias (nombre), proveedores!proveedor_asignado_id (nombre_razon_social, whatsapp)`).order('created_at', { ascending: false });
+      const tbody = document.getElementById('tabla-solicitudes'); tbody.innerHTML = '';
       if (data) {
         data.forEach(s => {
-          const tr = document.createElement('tr');
-          tr.className = 'hover:bg-gray-50 transition';
-          tr.innerHTML = `
-            <td class="p-4 text-gray-600">${new Date(s.created_at).toLocaleDateString()}</td>
-            <td class="p-4 font-medium text-gray-800">${s.clientes?.nombre || 'N/A'}</td>
-            <td class="p-4"><span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-semibold">${s.categorias?.nombre || 'N/A'}</span></td>
-            <td class="p-4"><span class="px-2 py-1 rounded text-xs font-bold ${getEstadoColor(s.estado)}">${s.estado ? s.estado.toUpperCase() : 'PENDIENTE'}</span></td>
-            <td class="p-4">
-              <button onclick="abrirModalGestion('${s.id}')" class="bg-blue-600 text-white px-3 py-1.5 rounded text-sm hover:bg-blue-700 transition shadow-sm">Gestionar</button>
-            </td>
-          `;
+          const colores = { pendiente: 'bg-gray-200 text-gray-800', difundida: 'bg-yellow-100 text-yellow-800', aceptada: 'bg-green-100 text-green-800', completada: 'bg-blue-100 text-blue-800' };
+          const color = colores[s.estado] || 'bg-gray-100 text-gray-800';
+          const tr = document.createElement('tr'); tr.className = 'hover:bg-gray-50 transition';
+          tr.innerHTML = `<td class="p-4 text-gray-600">${new Date(s.created_at).toLocaleDateString()}</td><td class="p-4 font-medium">${s.clientes?.nombre || 'N/A'}</td><td class="p-4"><span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-semibold">${s.categorias?.nombre || 'N/A'}</span></td><td class="p-4"><span class="px-2 py-1 rounded text-xs font-bold ${color}">${(s.estado || 'PENDIENTE').toUpperCase()}</span></td><td class="p-4"><button onclick="window.abrirModalGestion('${s.id}')" class="bg-blue-600 text-white px-3 py-1.5 rounded text-sm hover:bg-blue-700">Gestionar</button></td>`;
           tbody.appendChild(tr);
         });
       }
-    }
+    };
 
-    function getEstadoColor(estado) {
-      const colores = { 
-        pendiente: 'bg-gray-200 text-gray-800', 
-        difundida: 'bg-yellow-100 text-yellow-800', 
-        aceptada: 'bg-green-100 text-green-800', 
-        completada: 'bg-blue-100 text-blue-800' 
-      };
-      return colores[estado] || 'bg-gray-100 text-gray-800';
-    }
-
-    async function abrirModalGestion(solicitudId) {
+    window.abrirModalGestion = async function(solicitudId) {
       document.getElementById('modal-gestion').classList.remove('hidden');
       document.getElementById('modal-solicitud-id').value = solicitudId;
-
-      const { data: sol } = await supabaseClient.from('solicitudes').select(`
-        *, clientes (nombre, whatsapp), proveedores!proveedor_asignado_id (id, nombre_razon_social, whatsapp)
-      `).eq('id', solicitudId).single();
-
+      const { data: sol } = await window.db.from('solicitudes').select(`*, clientes (nombre, whatsapp), proveedores!proveedor_asignado_id (id, nombre_razon_social, whatsapp)`).eq('id', solicitudId).single();
       if (sol) {
         document.getElementById('modal-cliente-nombre').textContent = sol.clientes?.nombre || 'No asignado';
         document.getElementById('modal-cliente-ws').textContent = sol.clientes?.whatsapp || '-';
@@ -445,247 +330,215 @@
         document.getElementById('modal-proveedor-ws').textContent = sol.proveedores?.whatsapp || '-';
         document.getElementById('modal-proveedor-id').value = sol.proveedores?.id || '';
 
-        const { data: cobro } = await supabaseClient.from('cobros').select('*').eq('solicitud_id', solicitudId).single();
-        
+        const { data: cobro } = await window.db.from('cobros').select('*').eq('solicitud_id', solicitudId).single();
         document.getElementById('cobro-responsable').value = cobro?.responsable_pago || 'proveedor';
-        document.getElementById('cobro-monto').value = cobro ? (parseFloat(cobro.monto_cliente || 0) + parseFloat(cobro.monto_proveedor || 0)) : montoDefault;
+        document.getElementById('cobro-monto').value = cobro ? (parseFloat(cobro.monto_cliente || 0) + parseFloat(cobro.monto_proveedor || 0)) : window.montoDefault;
         document.getElementById('cobro-cliente-pagado').checked = cobro?.cliente_pagado || false;
         document.getElementById('cobro-proveedor-pagado').checked = cobro?.proveedor_pagado || false;
         document.getElementById('cobro-nota').value = cobro?.nota || '';
-
-        actualizarVistaCobro();
+        window.actualizarVistaCobro();
       }
-    }
+    };
 
-    function cerrarModal() {
-      document.getElementById('modal-gestion').classList.add('hidden');
-    }
+    window.cerrarModal = function(modalId) { document.getElementById(modalId).classList.add('hidden'); };
 
-    function actualizarVistaCobro() {
+    window.actualizarVistaCobro = function() {
       const clientePago = document.getElementById('cobro-cliente-pagado').checked;
       const proveedorPago = document.getElementById('cobro-proveedor-pagado').checked;
       const wsCliente = document.getElementById('modal-cliente-ws').textContent;
       const wsProveedor = document.getElementById('modal-proveedor-ws').textContent;
-
       let html = '';
       if (proveedorPago && wsProveedor !== '-' && wsProveedor !== 'No asignado') {
-        html += `<p class="text-green-700 font-semibold flex items-center gap-2"><i class="fab fa-whatsapp text-lg"></i> WhatsApp del Cliente revelado al Proveedor: <a href="https://wa.me/${wsCliente}" target="_blank" class="underline hover:text-green-800">${wsCliente}</a></p>`;
+        html += `<p class="text-green-700 font-semibold"><i class="fab fa-whatsapp"></i> WhatsApp del Cliente revelado al Proveedor: <a href="https://wa.me/${wsCliente}" target="_blank" class="underline">${wsCliente}</a></p>`;
       } else {
-        html += `<p class="text-red-600 text-xs flex items-center gap-1"><i class="fas fa-lock"></i> El proveedor debe pagar su comisión para ver el WhatsApp del cliente.</p>`;
+        html += `<p class="text-red-600 text-xs"><i class="fas fa-lock"></i> El proveedor debe pagar para ver el WhatsApp del cliente.</p>`;
       }
-
       if (clientePago && wsCliente !== '-' && wsCliente !== 'No asignado') {
-        html += `<p class="text-green-700 font-semibold flex items-center gap-2 mt-2"><i class="fab fa-whatsapp text-lg"></i> WhatsApp del Proveedor revelado al Cliente: <a href="https://wa.me/${wsProveedor}" target="_blank" class="underline hover:text-green-800">${wsProveedor}</a></p>`;
+        html += `<p class="text-green-700 font-semibold mt-2"><i class="fab fa-whatsapp"></i> WhatsApp del Proveedor revelado al Cliente: <a href="https://wa.me/${wsProveedor}" target="_blank" class="underline">${wsProveedor}</a></p>`;
       } else {
-        html += `<p class="text-red-600 text-xs flex items-center gap-1 mt-1"><i class="fas fa-lock"></i> El cliente debe pagar su comisión para ver el WhatsApp del proveedor.</p>`;
+        html += `<p class="text-red-600 text-xs mt-1"><i class="fas fa-lock"></i> El cliente debe pagar para ver el WhatsApp del proveedor.</p>`;
       }
       document.getElementById('vista-previa-contacto').innerHTML = html;
-    }
+    };
 
-    async function guardarCobroYDatos() {
+    window.guardarCobroYDatos = async function() {
       const solicitudId = document.getElementById('modal-solicitud-id').value;
       const proveedorId = document.getElementById('modal-proveedor-id').value;
       const responsable = document.getElementById('cobro-responsable').value;
       const montoTotal = parseFloat(document.getElementById('cobro-monto').value) || 0;
-      
       let montoCliente = 0, montoProveedor = 0;
       if (responsable === 'cliente') montoCliente = montoTotal;
       else if (responsable === 'proveedor') montoProveedor = montoTotal;
       else { montoCliente = montoTotal / 2; montoProveedor = montoTotal / 2; }
 
-      const clientePagado = document.getElementById('cobro-cliente-pagado').checked;
-      const proveedorPagado = document.getElementById('cobro-proveedor-pagado').checked;
-      const nota = document.getElementById('cobro-nota').value;
+      if (!proveedorId) return alert('Debes asignar un proveedor primero.');
 
-      if (!proveedorId) {
-        alert('Debes asignar un proveedor a la solicitud antes de gestionar el cobro.');
-        return;
-      }
-
-      const { error } = await supabaseClient.rpc('guardar_cobro', {
-        p_solicitud_id: solicitudId,
-        p_proveedor_id: proveedorId,
-        p_responsable_pago: responsable,
-        p_monto_cliente: montoCliente,
-        p_monto_proveedor: montoProveedor,
-        p_cliente_pagado: clientePagado,
-        p_proveedor_pagado: proveedorPagado,
-        p_nota: nota
+      const { error } = await window.db.rpc('guardar_cobro', {
+        p_solicitud_id: solicitudId, p_proveedor_id: proveedorId, p_responsable_pago: responsable,
+        p_monto_cliente: montoCliente, p_monto_proveedor: montoProveedor,
+        p_cliente_pagado: document.getElementById('cobro-cliente-pagado').checked,
+        p_proveedor_pagado: document.getElementById('cobro-proveedor-pagado').checked,
+        p_nota: document.getElementById('cobro-nota').value
       });
 
-      if (error) {
-        alert('Error al guardar: ' + error.message);
-        console.error(error);
-      } else {
-        alert('Cobro guardado y contactos actualizados correctamente.');
-        cerrarModal();
-        cargarSolicitudes();
-        cargarDashboard();
-      }
-    }
+      if (error) { alert('Error: ' + error.message); console.error(error); } 
+      else { alert('Guardado correctamente.'); window.cerrarModal('modal-gestion'); window.cargarSolicitudes(); window.cargarDashboard(); }
+    };
 
-    // --- COBROS ---
-    async function cargarCobros() {
-      const { data } = await supabaseClient.from('cobros').select(`
-        id, responsable_pago, monto_cliente, monto_proveedor, cliente_pagado, proveedor_pagado, nota, created_at,
-        solicitudes (id, descripcion),
-        proveedores (nombre_razon_social)
-      `).order('created_at', { ascending: false });
-
-      const tbody = document.getElementById('tabla-cobros');
-      tbody.innerHTML = '';
+    window.cargarCobros = async function() {
+      const { data } = await window.db.from('cobros').select(`id, responsable_pago, monto_cliente, monto_proveedor, cliente_pagado, proveedor_pagado, solicitudes (id), proveedores (nombre_razon_social)`).order('created_at', { ascending: false });
+      const tbody = document.getElementById('tabla-cobros'); tbody.innerHTML = '';
       if (data) {
         data.forEach(c => {
           const total = (parseFloat(c.monto_cliente) || 0) + (parseFloat(c.monto_proveedor) || 0);
-          const tr = document.createElement('tr');
-          tr.className = 'hover:bg-gray-50 transition';
-          tr.innerHTML = `
-            <td class="p-4 text-xs text-gray-600">${c.solicitudes?.id ? c.solicitudes.id.substring(0,8) + '...' : 'N/A'}<br><span class="font-medium text-gray-800">${c.proveedores?.nombre_razon_social || 'Sin proveedor'}</span></td>
-            <td class="p-4 capitalize text-gray-700">${c.responsable_pago ? c.responsable_pago.replace('_', ' ') : 'proveedor'}</td>
-            <td class="p-4 font-bold text-gray-800">Bs ${total.toFixed(2)}</td>
-            <td class="p-4">
-              ${c.cliente_pagado ? '<span class="text-green-600 text-xs font-semibold">✅ Cliente</span><br>' : '<span class="text-red-500 text-xs font-semibold">⏳ Cliente</span><br>'}
-              ${c.proveedor_pagado ? '<span class="text-green-600 text-xs font-semibold">✅ Proveedor</span>' : '<span class="text-red-500 text-xs font-semibold">⏳ Proveedor</span>'}
-            </td>
-            <td class="p-4">
-              ${!c.proveedor_pagado ? `<button onclick="registrarPagoManual('${c.id}', 'proveedor')" class="text-xs bg-green-600 text-white px-2 py-1.5 rounded mb-1 hover:bg-green-700 transition block w-full text-center">Marcar Pagó Prov.</button>` : ''}
-              ${!c.cliente_pagado ? `<button onclick="registrarPagoManual('${c.id}', 'cliente')" class="text-xs bg-blue-600 text-white px-2 py-1.5 rounded hover:bg-blue-700 transition block w-full text-center">Marcar Pagó Cli.</button>` : ''}
-            </td>
-          `;
+          const tr = document.createElement('tr'); tr.className = 'hover:bg-gray-50';
+          tr.innerHTML = `<td class="p-4 text-xs text-gray-600">${c.solicitudes?.id ? c.solicitudes.id.substring(0,8)+'...' : 'N/A'}<br><span class="font-medium">${c.proveedores?.nombre_razon_social || 'Sin proveedor'}</span></td><td class="p-4 capitalize">${c.responsable_pago || 'proveedor'}</td><td class="p-4 font-bold">Bs ${total.toFixed(2)}</td><td class="p-4">${c.cliente_pagado ? '<span class="text-green-600 text-xs">✅ Cli</span><br>' : '<span class="text-red-500 text-xs">⏳ Cli</span><br>'}${c.proveedor_pagado ? '<span class="text-green-600 text-xs">✅ Prov</span>' : '<span class="text-red-500 text-xs">⏳ Prov</span>'}</td><td class="p-4">${!c.proveedor_pagado ? `<button onclick="window.registrarPagoManual('${c.id}', 'proveedor')" class="text-xs bg-green-600 text-white px-2 py-1.5 rounded mb-1 block w-full text-center">Pagó Prov.</button>` : ''}${!c.cliente_pagado ? `<button onclick="window.registrarPagoManual('${c.id}', 'cliente')" class="text-xs bg-blue-600 text-white px-2 py-1.5 rounded block w-full text-center">Pagó Cli.</button>` : ''}</td>`;
           tbody.appendChild(tr);
         });
       }
-    }
+    };
 
-    async function registrarPagoManual(cobroId, quien) {
+    window.registrarPagoManual = async function(cobroId, quien) {
       const updates = quien === 'proveedor' ? { proveedor_pagado: true } : { cliente_pagado: true };
-      await supabaseClient.from('cobros').update(updates).eq('id', cobroId);
-      cargarCobros();
-      cargarDashboard();
-    }
+      await window.db.from('cobros').update(updates).eq('id', cobroId);
+      window.cargarCobros(); window.cargarDashboard();
+    };
 
-    // --- PROVEEDORES ---
-    async function cargarProveedores() {
-      const { data } = await supabaseClient.from('proveedores').select('id, nombre_razon_social, whatsapp, activo').order('created_at', { ascending: false });
-      const tbody = document.getElementById('tabla-proveedores');
-      tbody.innerHTML = '';
+    // 6. PROVEEDORES (MEJORADO CON EDICIÓN)
+    window.cargarProveedores = async function() {
+      // Fetch con joins para obtener nombres de categoría y zona
+      const { data } = await window.db.from('proveedores').select(`
+        id, nombre_razon_social, whatsapp, anios_experiencia, equipo, metodo_cobro, disponibilidad, activo,
+        categorias (nombre),
+        zonas (nombre)
+      `).order('created_at', { ascending: false });
+      
+      const tbody = document.getElementById('tabla-proveedores'); tbody.innerHTML = '';
       if (data) {
         data.forEach(p => {
-          const tr = document.createElement('tr');
-          tr.className = 'hover:bg-gray-50 transition';
+          const tr = document.createElement('tr'); tr.className = 'hover:bg-gray-50 transition';
           tr.innerHTML = `
-            <td class="p-4 font-medium text-gray-800">${p.nombre_razon_social}</td>
+            <td class="p-4 font-medium text-gray-800">${p.nombre_razon_social || '-'}</td>
             <td class="p-4 text-gray-600">${p.whatsapp || '-'}</td>
+            <td class="p-4 text-gray-600">${p.anios_experiencia || '0'} años</td>
+            <td class="p-4 text-gray-600">${p.categorias?.nombre || 'N/A'}</td>
+            <td class="p-4 text-gray-600">${p.zonas?.nombre || 'N/A'}</td>
+            <td class="p-4 text-gray-600 capitalize">${p.equipo ? p.equipo.replace('-', ' ') : 'N/A'}</td>
+            <td class="p-4 text-gray-600 uppercase text-xs">${p.metodo_cobro || 'N/A'}</td>
             <td class="p-4"><span class="px-2 py-1 rounded text-xs font-semibold ${p.activo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${p.activo ? 'Activo' : 'Inactivo'}</span></td>
             <td class="p-4">
-              <button onclick="toggleProveedor('${p.id}', ${!p.activo})" class="text-xs border border-gray-300 px-3 py-1.5 rounded hover:bg-gray-100 transition text-gray-700">
-                ${p.activo ? 'Desactivar' : 'Activar'}
+              <button onclick="window.abrirModalProveedor('${p.id}')" class="text-xs bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-700 transition mb-1 w-full text-center block">
+                <i class="fas fa-edit"></i> Editar
               </button>
             </td>
           `;
           tbody.appendChild(tr);
         });
       }
-    }
+    };
 
-    async function toggleProveedor(id, nuevoEstado) {
-      await supabaseClient.from('proveedores').update({ activo: nuevoEstado }).eq('id', id);
-      cargarProveedores();
-    }
+    window.abrirModalProveedor = async function(id) {
+      document.getElementById('modal-proveedor').classList.remove('hidden');
+      document.getElementById('edit-prov-id').value = id;
 
-    // --- CATÁLOGO ---
-    async function cargarCatalogo() {
-      const { data: zonas } = await supabaseClient.from('zonas').select('id, nombre, activa').order('nombre');
-      const { data: categorias } = await supabaseClient.from('categorias').select('id, nombre, activa').order('nombre');
-      
-      document.getElementById('lista-zonas').innerHTML = zonas ? zonas.map(z => `
-        <li class="flex justify-between items-center bg-gray-50 p-3 rounded border border-gray-100">
-          <span class="font-medium text-gray-700">${z.nombre}</span> 
-          <button onclick="toggleCatalogo('zonas', '${z.id}', ${!z.activa})" class="text-xs text-blue-600 hover:text-blue-800 font-semibold hover:underline">
-            ${z.activa ? 'Desactivar' : 'Activar'}
-          </button>
-        </li>
-      `).join('') : '<li class="text-gray-500 text-sm">No hay zonas registradas.</li>';
-      
-      document.getElementById('lista-categorias').innerHTML = categorias ? categorias.map(c => `
-        <li class="flex justify-between items-center bg-gray-50 p-3 rounded border border-gray-100">
-          <span class="font-medium text-gray-700">${c.nombre}</span> 
-          <button onclick="toggleCatalogo('categorias', '${c.id}', ${!c.activa})" class="text-xs text-blue-600 hover:text-blue-800 font-semibold hover:underline">
-            ${c.activa ? 'Desactivar' : 'Activar'}
-          </button>
-        </li>
-      `).join('') : '<li class="text-gray-500 text-sm">No hay categorías registradas.</li>';
-    }
+      // Cargar datos del proveedor
+      const { data: p } = await window.db.from('proveedores').select('*').eq('id', id).single();
+      if (p) {
+        document.getElementById('edit-prov-nombre').value = p.nombre_razon_social || '';
+        document.getElementById('edit-prov-whatsapp').value = p.whatsapp || '';
+        document.getElementById('edit-prov-exp').value = p.anios_experiencia || '';
+        document.getElementById('edit-prov-equipo').value = p.equipo || 'solo';
+        document.getElementById('edit-prov-metodo').value = p.metodo_cobro || 'qr';
+        document.getElementById('edit-prov-disp').value = p.disponibilidad || '';
+        document.getElementById('edit-prov-activo').checked = p.activo;
+      }
 
-    async function agregarZona() {
+      // Cargar opciones de categorías y zonas para los selects del modal
+      const { data: cats } = await window.db.from('categorias').select('id, nombre').eq('activa', true).order('nombre');
+      const selectCat = document.getElementById('edit-prov-categoria');
+      selectCat.innerHTML = '<option value="">Sin categoría</option>' + (cats ? cats.map(c => `<option value="${c.id}" ${p && p.categoria_id === c.id ? 'selected' : ''}>${c.nombre}</option>`).join('') : '');
+
+      const { data: zonas } = await window.db.from('zonas').select('id, nombre').eq('activa', true).order('nombre');
+      const selectZona = document.getElementById('edit-prov-zona');
+      selectZona.innerHTML = '<option value="">Sin zona</option>' + (zonas ? zonas.map(z => `<option value="${z.id}" ${p && p.zona_id === z.id ? 'selected' : ''}>${z.nombre}</option>`).join('') : '');
+    };
+
+    window.guardarProveedor = async function() {
+      const id = document.getElementById('edit-prov-id').value;
+      const updates = {
+        nombre_razon_social: document.getElementById('edit-prov-nombre').value,
+        whatsapp: document.getElementById('edit-prov-whatsapp').value,
+        anios_experiencia: parseInt(document.getElementById('edit-prov-exp').value) || 0,
+        categoria_id: document.getElementById('edit-prov-categoria').value || null,
+        zona_id: document.getElementById('edit-prov-zona').value || null,
+        equipo: document.getElementById('edit-prov-equipo').value,
+        metodo_cobro: document.getElementById('edit-prov-metodo').value,
+        disponibilidad: document.getElementById('edit-prov-disp').value,
+        activo: document.getElementById('edit-prov-activo').checked
+      };
+
+      const { error } = await window.db.from('proveedores').update(updates).eq('id', id);
+      if (error) {
+        alert('Error al guardar: ' + error.message);
+      } else {
+        alert('Proveedor actualizado correctamente.');
+        window.cerrarModal('modal-proveedor');
+        window.cargarProveedores();
+      }
+    };
+
+    // 7. Catálogo
+    window.cargarCatalogo = async function() {
+      const { data: zonas } = await window.db.from('zonas').select('id, nombre, activa').order('nombre');
+      const { data: categorias } = await window.db.from('categorias').select('id, nombre, activa').order('nombre');
+      document.getElementById('lista-zonas').innerHTML = zonas ? zonas.map(z => `<li class="flex justify-between items-center bg-gray-50 p-3 rounded border"><span>${z.nombre}</span><button onclick="window.toggleCatalogo('zonas', '${z.id}', ${!z.activa})" class="text-xs text-blue-600 font-semibold">${z.activa ? 'Desactivar' : 'Activar'}</button></li>`).join('') : '';
+      document.getElementById('lista-categorias').innerHTML = categorias ? categorias.map(c => `<li class="flex justify-between items-center bg-gray-50 p-3 rounded border"><span>${c.nombre}</span><button onclick="window.toggleCatalogo('categorias', '${c.id}', ${!c.activa})" class="text-xs text-blue-600 font-semibold">${c.activa ? 'Desactivar' : 'Activar'}</button></li>`).join('') : '';
+    };
+
+    window.agregarZona = async function() {
       const nombre = document.getElementById('nueva-zona').value.trim();
-      if (nombre) {
-        await supabaseClient.from('zonas').insert({ nombre, activa: true });
-        document.getElementById('nueva-zona').value = '';
-        cargarCatalogo();
-      }
-    }
+      if (nombre) { await window.db.from('zonas').insert({ nombre, activa: true }); document.getElementById('nueva-zona').value = ''; window.cargarCatalogo(); }
+    };
 
-    async function agregarCategoria() {
+    window.agregarCategoria = async function() {
       const nombre = document.getElementById('nueva-categoria').value.trim();
-      if (nombre) {
-        await supabaseClient.from('categorias').insert({ nombre, activa: true });
-        document.getElementById('nueva-categoria').value = '';
-        cargarCatalogo();
-      }
-    }
+      if (nombre) { await window.db.from('categorias').insert({ nombre, activa: true }); document.getElementById('nueva-categoria').value = ''; window.cargarCatalogo(); }
+    };
 
-    async function toggleCatalogo(tabla, id, nuevoEstado) {
-      await supabaseClient.from(tabla).update({ activa: nuevoEstado }).eq('id', id);
-      cargarCatalogo();
-    }
+    window.toggleCatalogo = async function(tabla, id, nuevoEstado) {
+      await window.db.from(tabla).update({ activa: nuevoEstado }).eq('id', id);
+      window.cargarCatalogo();
+    };
 
-    // --- MEDIACIONES ---
-    async function cargarMediaciones() {
-      const { data } = await supabaseClient.from('mediaciones').select('*, solicitudes (id)').order('created_at', { ascending: false });
-      const container = document.getElementById('lista-mediaciones');
-      container.innerHTML = '';
+    // 8. Mediaciones
+    window.cargarMediaciones = async function() {
+      const { data } = await window.db.from('mediaciones').select('*, solicitudes (id)').order('created_at', { ascending: false });
+      const container = document.getElementById('lista-mediaciones'); container.innerHTML = '';
       if (data && data.length > 0) {
         data.forEach(m => {
-          const div = document.createElement('div');
-          div.className = 'border border-gray-200 p-4 rounded-lg bg-gray-50';
-          div.innerHTML = `
-            <div class="flex justify-between mb-2">
-              <span class="font-bold text-sm text-gray-800">Solicitud: ${m.solicitudes?.id ? m.solicitudes.id.substring(0,8) : 'N/A'}</span>
-              <span class="text-xs font-semibold px-2 py-1 rounded ${m.atendida ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${m.atendida ? 'Resuelta' : 'Pendiente'}</span>
-            </div>
-            <p class="text-sm mb-2 text-gray-700"><strong class="text-gray-900">Motivo:</strong> ${m.motivo || 'No especificado'}</p>
-            <p class="text-sm text-gray-600"><strong class="text-gray-900">Resolución:</strong> ${m.resolucion || 'Sin resolver aún'}</p>
-          `;
+          const div = document.createElement('div'); div.className = 'border p-4 rounded bg-gray-50';
+          div.innerHTML = `<div class="flex justify-between mb-2"><span class="font-bold text-sm">Solicitud: ${m.solicitudes?.id ? m.solicitudes.id.substring(0,8) : 'N/A'}</span><span class="text-xs px-2 py-1 rounded ${m.atendida ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${m.atendida ? 'Resuelta' : 'Pendiente'}</span></div><p class="text-sm mb-2"><strong>Motivo:</strong> ${m.motivo || 'No especificado'}</p><p class="text-sm text-gray-600"><strong>Resolución:</strong> ${m.resolucion || 'Sin resolver'}</p>`;
           container.appendChild(div);
         });
-      } else {
-        container.innerHTML = '<p class="text-gray-500 text-center py-4">No hay mediaciones registradas.</p>';
-      }
-    }
+      } else { container.innerHTML = '<p class="text-gray-500 text-center py-4">No hay mediaciones.</p>'; }
+    };
 
-    // --- CONFIGURACIÓN ---
-    async function cargarConfiguracion() {
-      const { data } = await supabaseClient.from('configuracion').select('valor').eq('clave', 'monto_comision_default').single();
-      if (data) {
-        montoDefault = parseFloat(data.valor);
-        document.getElementById('config-monto').value = montoDefault;
-      }
-    }
+    // 9. Configuración
+    window.cargarConfiguracion = async function() {
+      const { data } = await window.db.from('configuracion').select('valor').eq('clave', 'monto_comision_default').single();
+      if (data) { window.montoDefault = parseFloat(data.valor); document.getElementById('config-monto').value = window.montoDefault; }
+    };
 
-    async function guardarConfiguracion() {
+    window.guardarConfiguracion = async function() {
       const nuevoMonto = document.getElementById('config-monto').value;
-      if (!nuevoMonto || nuevoMonto < 0) {
-        alert("Por favor ingresa un monto válido.");
-        return;
-      }
-      await supabaseClient.from('configuracion').upsert({ clave: 'monto_comision_default', valor: nuevoMonto });
-      alert('Configuración guardada. El nuevo monto por defecto será Bs ' + nuevoMonto);
-      montoDefault = parseFloat(nuevoMonto);
-    }
+      if (!nuevoMonto || nuevoMonto < 0) return alert("Monto inválido.");
+      await window.db.from('configuracion').upsert({ clave: 'monto_comision_default', valor: nuevoMonto });
+      alert('Configuración guardada. Nuevo monto: Bs ' + nuevoMonto);
+      window.montoDefault = parseFloat(nuevoMonto);
+    };
 
-    // Iniciar la aplicación al cargar la página
-    checkAuth();
+    // Iniciar
+    window.checkAuth();
   </script>
 </body>
 </html>
