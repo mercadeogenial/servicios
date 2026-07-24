@@ -10,7 +10,7 @@
 </head>
 <body class="bg-gray-50 text-gray-800 font-sans">
 
-  <!-- TOAST DE NOTIFICACIÓN (Elegante, sin alerts) -->
+  <!-- TOAST DE NOTIFICACIÓN -->
   <div id="toast" class="fixed top-5 right-5 bg-green-600 text-white px-6 py-3 rounded-lg shadow-xl transform translate-x-full transition-transform duration-300 z-[100] flex items-center gap-3">
     <i class="fas fa-check-circle text-xl"></i>
     <span id="toast-message" class="font-medium">Operación exitosa</span>
@@ -244,12 +244,11 @@
     window.db = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
     window.montoDefault = 10.00;
 
-    // 2. Sistema de Notificaciones (Toast) - Reemplaza a los alerts feos
+    // 2. Sistema de Notificaciones (Toast)
     window.mostrarToast = function(mensaje, tipo = 'success') {
       const toast = document.getElementById('toast');
       const msgEl = document.getElementById('toast-message');
       msgEl.textContent = mensaje;
-      
       if (tipo === 'error') {
         toast.classList.remove('bg-green-600');
         toast.classList.add('bg-red-600');
@@ -259,11 +258,8 @@
         toast.classList.add('bg-green-600');
         toast.querySelector('i').className = 'fas fa-check-circle text-xl';
       }
-      
       toast.classList.remove('translate-x-full');
-      setTimeout(() => {
-        toast.classList.add('translate-x-full');
-      }, 3500);
+      setTimeout(() => { toast.classList.add('translate-x-full'); }, 3500);
     };
 
     // 3. Funciones de Autenticación
@@ -324,7 +320,6 @@
       const hoy = new Date().toISOString().split('T')[0];
       const { count: solicitudesHoy } = await window.db.from('solicitudes').select('*', { count: 'exact', head: true }).gte('created_at', hoy);
       document.getElementById('stat-solicitudes-hoy').textContent = solicitudesHoy || 0;
-
       const { data: cobros } = await window.db.from('cobros').select('cliente_pagado, proveedor_pagado, monto_cliente, monto_proveedor');
       let pendientes = 0, ingresos = 0;
       if (cobros) {
@@ -336,7 +331,6 @@
       }
       document.getElementById('stat-cobros-pendientes').textContent = pendientes;
       document.getElementById('stat-ingresos').textContent = ingresos.toFixed(2);
-      
       const { count: aceptadas } = await window.db.from('solicitudes').select('*', { count: 'exact', head: true }).eq('estado', 'aceptada');
       const { count: difundidas } = await window.db.from('solicitudes').select('*', { count: 'exact', head: true }).in('estado', ['difundida', 'aceptada', 'cotizada', 'pagada', 'en_ejecucion', 'completada']);
       const tasa = difundidas > 0 ? ((aceptadas / difundidas) * 100).toFixed(1) : 0;
@@ -368,7 +362,6 @@
         document.getElementById('modal-proveedor-nombre').textContent = sol.proveedores?.nombre_razon_social || 'No asignado';
         document.getElementById('modal-proveedor-ws').textContent = sol.proveedores?.whatsapp || '-';
         document.getElementById('modal-proveedor-id').value = sol.proveedores?.id || '';
-
         const { data: cobro } = await window.db.from('cobros').select('*').eq('solicitud_id', solicitudId).single();
         document.getElementById('cobro-responsable').value = cobro?.responsable_pago || 'proveedor';
         document.getElementById('cobro-monto').value = cobro ? (parseFloat(cobro.monto_cliente || 0) + parseFloat(cobro.monto_proveedor || 0)) : window.montoDefault;
@@ -409,9 +402,7 @@
       if (responsable === 'cliente') montoCliente = montoTotal;
       else if (responsable === 'proveedor') montoProveedor = montoTotal;
       else { montoCliente = montoTotal / 2; montoProveedor = montoTotal / 2; }
-
       if (!proveedorId) return window.mostrarToast('Debes asignar un proveedor primero.', 'error');
-
       const { error } = await window.db.rpc('guardar_cobro', {
         p_solicitud_id: solicitudId, p_proveedor_id: proveedorId, p_responsable_pago: responsable,
         p_monto_cliente: montoCliente, p_monto_proveedor: montoProveedor,
@@ -419,16 +410,8 @@
         p_proveedor_pagado: document.getElementById('cobro-proveedor-pagado').checked,
         p_nota: document.getElementById('cobro-nota').value
       });
-
-      if (error) { 
-        window.mostrarToast('Error: ' + error.message, 'error'); 
-        console.error(error); 
-      } else { 
-        window.mostrarToast('Cobro guardado y contactos actualizados.'); 
-        window.cerrarModal('modal-gestion'); 
-        window.cargarSolicitudes(); 
-        window.cargarDashboard(); 
-      }
+      if (error) { window.mostrarToast('Error: ' + error.message, 'error'); console.error(error); } 
+      else { window.mostrarToast('Cobro guardado y contactos actualizados.'); window.cerrarModal('modal-gestion'); window.cargarSolicitudes(); window.cargarDashboard(); }
     };
 
     window.cargarCobros = async function() {
@@ -451,24 +434,49 @@
       window.cargarCobros(); window.cargarDashboard();
     };
 
-    // 7. PROVEEDORES (BLINDADO)
+    // 7. PROVEEDORES (CON PLAN B INFALIBLE)
     window.cargarProveedores = async function() {
-      const { data } = await window.db.from('proveedores').select(`
-        id, nombre_razon_social, whatsapp, anios_experiencia, equipo, metodo_cobro, disponibilidad, activo,
+      // Intentamos cargar con las relaciones (joins) de Supabase
+      let { data, error } = await window.db.from('proveedores').select(`
+        id, nombre_razon_social, whatsapp, anios_experiencia, equipo, metodo_cobro, disponibilidad, activo, categoria_id, zona_id,
         categorias (nombre),
         zonas (nombre)
       `).order('created_at', { ascending: false });
+
+      // Si falla (por falta de Foreign Keys en la base de datos), usamos el Plan B
+      if (error) {
+        console.warn("Las relaciones (Foreign Keys) no están configuradas. Usando método alternativo...", error);
+        const { data: provs } = await window.db.from('proveedores').select(`
+          id, nombre_razon_social, whatsapp, anios_experiencia, equipo, metodo_cobro, disponibilidad, activo, categoria_id, zona_id
+        `).order('created_at', { ascending: false });
+        
+        const { data: cats } = await window.db.from('categorias').select('id, nombre');
+        const { data: zonasList } = await window.db.from('zonas').select('id, nombre');
+
+        data = provs ? provs.map(p => {
+          const cat = cats?.find(c => c.id === p.categoria_id);
+          const zona = zonasList?.find(z => z.id === p.zona_id);
+          return {
+            ...p,
+            categorias: cat ? { nombre: cat.nombre } : null,
+            zonas: zona ? { nombre: zona.nombre } : null
+          };
+        }) : [];
+      }
       
-      const tbody = document.getElementById('tabla-proveedores'); tbody.innerHTML = '';
-      if (data) {
+      const tbody = document.getElementById('tabla-proveedores'); 
+      tbody.innerHTML = '';
+      
+      if (data && data.length > 0) {
         data.forEach(p => {
-          const tr = document.createElement('tr'); tr.className = 'hover:bg-gray-50 transition';
+          const tr = document.createElement('tr'); 
+          tr.className = 'hover:bg-gray-50 transition';
           tr.innerHTML = `
             <td class="p-4 font-medium text-gray-800">${p.nombre_razon_social || '-'}</td>
             <td class="p-4 text-gray-600">${p.whatsapp || '-'}</td>
             <td class="p-4 text-gray-600">${p.anios_experiencia || '0'} años</td>
-            <td class="p-4 text-gray-600">${p.categorias?.nombre || 'N/A'}</td>
-            <td class="p-4 text-gray-600">${p.zonas?.nombre || 'N/A'}</td>
+            <td class="p-4 text-gray-600">${p.categorias?.nombre || (p.categoria_id ? 'ID: ' + p.categoria_id.substring(0,4) : 'N/A')}</td>
+            <td class="p-4 text-gray-600">${p.zonas?.nombre || (p.zona_id ? 'ID: ' + p.zona_id.substring(0,4) : 'N/A')}</td>
             <td class="p-4 text-gray-600 capitalize">${p.equipo ? p.equipo.replace('-', ' ') : 'N/A'}</td>
             <td class="p-4 text-gray-600 uppercase text-xs">${p.metodo_cobro || 'N/A'}</td>
             <td class="p-4"><span class="px-2 py-1 rounded text-xs font-semibold ${p.activo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${p.activo ? 'Activo' : 'Inactivo'}</span></td>
@@ -480,16 +488,16 @@
           `;
           tbody.appendChild(tr);
         });
+      } else {
+        tbody.innerHTML = '<tr><td colspan="9" class="p-8 text-center text-gray-500">No hay proveedores registrados aún.</td></tr>';
       }
     };
 
     window.abrirModalProveedor = async function(id) {
       document.getElementById('modal-proveedor').classList.remove('hidden');
       document.getElementById('edit-prov-id').value = id;
-
       const { data: p, error: pError } = await window.db.from('proveedores').select('*').eq('id', id).single();
       if (pError) { console.error("Error cargando proveedor:", pError); return; }
-
       if (p) {
         document.getElementById('edit-prov-nombre').value = p.nombre_razon_social || '';
         document.getElementById('edit-prov-whatsapp').value = p.whatsapp || '';
@@ -499,7 +507,6 @@
         document.getElementById('edit-prov-disp').value = p.disponibilidad || '';
         document.getElementById('edit-prov-activo').checked = p.activo;
       }
-
       const { data: cats } = await window.db.from('categorias').select('id, nombre').eq('activa', true).order('nombre');
       const selectCat = document.getElementById('edit-prov-categoria');
       let catHtml = '<option value="">Sin categoría</option>';
@@ -517,12 +524,10 @@
       const id = document.getElementById('edit-prov-id').value;
       const catVal = document.getElementById('edit-prov-categoria').value;
       const zonaVal = document.getElementById('edit-prov-zona').value;
-
       const updates = {
         nombre_razon_social: document.getElementById('edit-prov-nombre').value,
         whatsapp: document.getElementById('edit-prov-whatsapp').value,
         anios_experiencia: parseInt(document.getElementById('edit-prov-exp').value) || 0,
-        // Conversión estricta a null si está vacío, obligatorio para campos UUID en PostgreSQL
         categoria_id: catVal === "" ? null : catVal,
         zona_id: zonaVal === "" ? null : zonaVal,
         equipo: document.getElementById('edit-prov-equipo').value,
@@ -530,9 +535,7 @@
         disponibilidad: document.getElementById('edit-prov-disp').value,
         activo: document.getElementById('edit-prov-activo').checked
       };
-
       const { error } = await window.db.from('proveedores').update(updates).eq('id', id);
-      
       if (error) {
         console.error("Error detallado:", error);
         window.mostrarToast('Error al guardar: ' + error.message, 'error');
