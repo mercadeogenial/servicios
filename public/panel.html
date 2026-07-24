@@ -73,7 +73,7 @@
         </div>
       </div>
 
-      <!-- Proveedores (MEJORADO) -->
+      <!-- Proveedores -->
       <div id="tab-proveedores" class="tab-content hidden">
         <h2 class="text-2xl font-bold mb-4 text-gray-800">Directorio de Proveedores</h2>
         <div class="bg-white rounded-lg shadow-sm overflow-x-auto border border-gray-200">
@@ -133,7 +133,7 @@
     </main>
   </div>
 
-  <!-- MODAL DE GESTIÓN DE SOLICITUDES (Existente) -->
+  <!-- MODAL DE GESTIÓN DE SOLICITUDES -->
   <div id="modal-gestion" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 p-4 backdrop-blur-sm">
     <div class="bg-white rounded-lg shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
       <div class="p-6 border-b border-gray-200 flex justify-between items-center bg-gray-50 rounded-t-lg">
@@ -181,7 +181,7 @@
     </div>
   </div>
 
-  <!-- MODAL DE EDICIÓN DE PROVEEDOR (NUEVO) -->
+  <!-- MODAL DE EDICIÓN DE PROVEEDOR -->
   <div id="modal-proveedor" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 p-4 backdrop-blur-sm">
     <div class="bg-white rounded-lg shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
       <div class="p-6 border-b border-gray-200 flex justify-between items-center bg-gray-50 rounded-t-lg">
@@ -194,19 +194,29 @@
           <div><label class="block text-sm font-semibold mb-1">Nombre / Razón Social</label><input type="text" id="edit-prov-nombre" class="w-full border border-gray-300 p-2 rounded"></div>
           <div><label class="block text-sm font-semibold mb-1">WhatsApp</label><input type="text" id="edit-prov-whatsapp" class="w-full border border-gray-300 p-2 rounded"></div>
           <div><label class="block text-sm font-semibold mb-1">Años de Experiencia</label><input type="number" id="edit-prov-exp" class="w-full border border-gray-300 p-2 rounded"></div>
-          <div><label class="block text-sm font-semibold mb-1">Categoría</label><select id="edit-prov-categoria" class="w-full border border-gray-300 p-2 rounded"></select></div>
-          <div><label class="block text-sm font-semibold mb-1">Zona Principal</label><select id="edit-prov-zona" class="w-full border border-gray-300 p-2 rounded"></select></div>
+          <div>
+            <label class="block text-sm font-semibold mb-1">Categoría</label>
+            <select id="edit-prov-categoria" class="w-full border border-gray-300 p-2 rounded bg-white">
+              <option value="">Sin categoría</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-semibold mb-1">Zona Principal</label>
+            <select id="edit-prov-zona" class="w-full border border-gray-300 p-2 rounded bg-white">
+              <option value="">Sin zona</option>
+            </select>
+          </div>
           <div><label class="block text-sm font-semibold mb-1">Equipo</label>
-            <select id="edit-prov-equipo" class="w-full border border-gray-300 p-2 rounded">
+            <select id="edit-prov-equipo" class="w-full border border-gray-300 p-2 rounded bg-white">
               <option value="solo">Solo</option><option value="1-2">Con 1-2 ayudantes</option><option value="3+">Con equipo de 3 o más</option>
             </select>
           </div>
           <div><label class="block text-sm font-semibold mb-1">Método de Cobro</label>
-            <select id="edit-prov-metodo" class="w-full border border-gray-300 p-2 rounded">
+            <select id="edit-prov-metodo" class="w-full border border-gray-300 p-2 rounded bg-white">
               <option value="qr">QR Simple (banco)</option><option value="tigo">Tigo Money</option><option value="ambos">Ambos</option><option value="efectivo">Efectivo</option>
             </select>
           </div>
-          <div><label class="block text-sm font-semibold mb-1">Disponibilidad (Texto libre)</label><input type="text" id="edit-prov-disp" class="w-full border border-gray-300 p-2 rounded" placeholder="Ej: Lunes a Viernes 8-18hs"></div>
+          <div><label class="block text-sm font-semibold mb-1">Disponibilidad</label><input type="text" id="edit-prov-disp" class="w-full border border-gray-300 p-2 rounded" placeholder="Ej: Lunes a Viernes 8-18hs"></div>
         </div>
         <div class="flex items-center gap-2 mt-2">
           <input type="checkbox" id="edit-prov-activo" class="w-5 h-5 text-blue-600 rounded">
@@ -404,9 +414,8 @@
       window.cargarCobros(); window.cargarDashboard();
     };
 
-    // 6. PROVEEDORES (MEJORADO CON EDICIÓN)
+    // 6. PROVEEDORES (CORREGIDO PARA UUIDs)
     window.cargarProveedores = async function() {
-      // Fetch con joins para obtener nombres de categoría y zona
       const { data } = await window.db.from('proveedores').select(`
         id, nombre_razon_social, whatsapp, anios_experiencia, equipo, metodo_cobro, disponibilidad, activo,
         categorias (nombre),
@@ -441,8 +450,9 @@
       document.getElementById('modal-proveedor').classList.remove('hidden');
       document.getElementById('edit-prov-id').value = id;
 
-      // Cargar datos del proveedor
-      const { data: p } = await window.db.from('proveedores').select('*').eq('id', id).single();
+      const { data: p, error: pError } = await window.db.from('proveedores').select('*').eq('id', id).single();
+      if (pError) { console.error("Error cargando proveedor:", pError); return; }
+
       if (p) {
         document.getElementById('edit-prov-nombre').value = p.nombre_razon_social || '';
         document.getElementById('edit-prov-whatsapp').value = p.whatsapp || '';
@@ -453,33 +463,56 @@
         document.getElementById('edit-prov-activo').checked = p.activo;
       }
 
-      // Cargar opciones de categorías y zonas para los selects del modal
+      // Cargar categorías
       const { data: cats } = await window.db.from('categorias').select('id, nombre').eq('activa', true).order('nombre');
       const selectCat = document.getElementById('edit-prov-categoria');
-      selectCat.innerHTML = '<option value="">Sin categoría</option>' + (cats ? cats.map(c => `<option value="${c.id}" ${p && p.categoria_id === c.id ? 'selected' : ''}>${c.nombre}</option>`).join('') : '');
+      let catHtml = '<option value="">Sin categoría</option>';
+      if (cats) {
+        catHtml += cats.map(c => `<option value="${c.id}" ${p && p.categoria_id === c.id ? 'selected' : ''}>${c.nombre}</option>`).join('');
+      }
+      selectCat.innerHTML = catHtml;
 
+      // Cargar zonas
       const { data: zonas } = await window.db.from('zonas').select('id, nombre').eq('activa', true).order('nombre');
       const selectZona = document.getElementById('edit-prov-zona');
-      selectZona.innerHTML = '<option value="">Sin zona</option>' + (zonas ? zonas.map(z => `<option value="${z.id}" ${p && p.zona_id === z.id ? 'selected' : ''}>${z.nombre}</option>`).join('') : '');
+      let zonaHtml = '<option value="">Sin zona</option>';
+      if (zonas) {
+        zonaHtml += zonas.map(z => `<option value="${z.id}" ${p && p.zona_id === z.id ? 'selected' : ''}>${z.nombre}</option>`).join('');
+      }
+      selectZona.innerHTML = zonaHtml;
     };
 
+    // === AQUÍ ESTÁ LA CORRECCIÓN CLAVE PARA UUIDs ===
     window.guardarProveedor = async function() {
       const id = document.getElementById('edit-prov-id').value;
+      
+      // 1. Capturar los valores de los selects
+      const catVal = document.getElementById('edit-prov-categoria').value;
+      const zonaVal = document.getElementById('edit-prov-zona').value;
+
+      // 2. Construir el objeto de actualización, forzando NULL si el valor es cadena vacía
       const updates = {
         nombre_razon_social: document.getElementById('edit-prov-nombre').value,
         whatsapp: document.getElementById('edit-prov-whatsapp').value,
         anios_experiencia: parseInt(document.getElementById('edit-prov-exp').value) || 0,
-        categoria_id: document.getElementById('edit-prov-categoria').value || null,
-        zona_id: document.getElementById('edit-prov-zona').value || null,
+        
+        // ESTA ES LA CLAVE: Si es "", enviamos null. Supabase requiere null, no "", para campos UUID vacíos.
+        categoria_id: catVal === "" ? null : catVal,
+        zona_id: zonaVal === "" ? null : zonaVal,
+        
         equipo: document.getElementById('edit-prov-equipo').value,
         metodo_cobro: document.getElementById('edit-prov-metodo').value,
         disponibilidad: document.getElementById('edit-prov-disp').value,
         activo: document.getElementById('edit-prov-activo').checked
       };
 
+      console.log("Enviando a Supabase:", updates); // Para depuración en consola
+
       const { error } = await window.db.from('proveedores').update(updates).eq('id', id);
+      
       if (error) {
         alert('Error al guardar: ' + error.message);
+        console.error("Error detallado:", error);
       } else {
         alert('Proveedor actualizado correctamente.');
         window.cerrarModal('modal-proveedor');
