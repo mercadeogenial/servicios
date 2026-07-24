@@ -10,6 +10,12 @@
 </head>
 <body class="bg-gray-50 text-gray-800 font-sans">
 
+  <!-- TOAST DE NOTIFICACIÓN (Elegante, sin alerts) -->
+  <div id="toast" class="fixed top-5 right-5 bg-green-600 text-white px-6 py-3 rounded-lg shadow-xl transform translate-x-full transition-transform duration-300 z-[100] flex items-center gap-3">
+    <i class="fas fa-check-circle text-xl"></i>
+    <span id="toast-message" class="font-medium">Operación exitosa</span>
+  </div>
+
   <!-- PANTALLA DE LOGIN -->
   <div id="login-screen" class="fixed inset-0 bg-blue-900 flex items-center justify-center z-50">
     <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md mx-4">
@@ -131,6 +137,7 @@
         </div>
       </div>
     </main>
+    <footer class="text-center text-gray-400 text-xs py-4">ServiExpress MVP © 2024</footer>
   </div>
 
   <!-- MODAL DE GESTIÓN DE SOLICITUDES -->
@@ -237,11 +244,33 @@
     window.db = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
     window.montoDefault = 10.00;
 
-    // 2. Funciones de Autenticación
+    // 2. Sistema de Notificaciones (Toast) - Reemplaza a los alerts feos
+    window.mostrarToast = function(mensaje, tipo = 'success') {
+      const toast = document.getElementById('toast');
+      const msgEl = document.getElementById('toast-message');
+      msgEl.textContent = mensaje;
+      
+      if (tipo === 'error') {
+        toast.classList.remove('bg-green-600');
+        toast.classList.add('bg-red-600');
+        toast.querySelector('i').className = 'fas fa-exclamation-circle text-xl';
+      } else {
+        toast.classList.remove('bg-red-600');
+        toast.classList.add('bg-green-600');
+        toast.querySelector('i').className = 'fas fa-check-circle text-xl';
+      }
+      
+      toast.classList.remove('translate-x-full');
+      setTimeout(() => {
+        toast.classList.add('translate-x-full');
+      }, 3500);
+    };
+
+    // 3. Funciones de Autenticación
     window.appLogin = async function() {
       const email = document.getElementById('login-email').value;
       const password = document.getElementById('login-password').value;
-      if (!email || !password) return alert("Ingresa correo y contraseña");
+      if (!email || !password) return window.mostrarToast("Ingresa correo y contraseña", "error");
       const btn = document.querySelector('#login-screen button');
       btn.textContent = 'Verificando...'; btn.disabled = true;
       const { data, error } = await window.db.auth.signInWithPassword({ email, password });
@@ -271,7 +300,7 @@
       window.location.reload();
     };
 
-    // 3. Navegación
+    // 4. Navegación
     window.showTab = function(tabId) {
       document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
       document.getElementById(`tab-${tabId}`).classList.remove('hidden');
@@ -290,7 +319,7 @@
       if (tabId === 'configuracion') window.cargarConfiguracion();
     };
 
-    // 4. Dashboard
+    // 5. Dashboard
     window.cargarDashboard = async function() {
       const hoy = new Date().toISOString().split('T')[0];
       const { count: solicitudesHoy } = await window.db.from('solicitudes').select('*', { count: 'exact', head: true }).gte('created_at', hoy);
@@ -314,7 +343,7 @@
       document.getElementById('stat-conversion').textContent = tasa + '%';
     };
 
-    // 5. Solicitudes
+    // 6. Solicitudes
     window.cargarSolicitudes = async function() {
       const { data } = await window.db.from('solicitudes').select(`id, created_at, estado, clientes (nombre, whatsapp), categorias (nombre), proveedores!proveedor_asignado_id (nombre_razon_social, whatsapp)`).order('created_at', { ascending: false });
       const tbody = document.getElementById('tabla-solicitudes'); tbody.innerHTML = '';
@@ -381,7 +410,7 @@
       else if (responsable === 'proveedor') montoProveedor = montoTotal;
       else { montoCliente = montoTotal / 2; montoProveedor = montoTotal / 2; }
 
-      if (!proveedorId) return alert('Debes asignar un proveedor primero.');
+      if (!proveedorId) return window.mostrarToast('Debes asignar un proveedor primero.', 'error');
 
       const { error } = await window.db.rpc('guardar_cobro', {
         p_solicitud_id: solicitudId, p_proveedor_id: proveedorId, p_responsable_pago: responsable,
@@ -391,8 +420,15 @@
         p_nota: document.getElementById('cobro-nota').value
       });
 
-      if (error) { alert('Error: ' + error.message); console.error(error); } 
-      else { alert('Guardado correctamente.'); window.cerrarModal('modal-gestion'); window.cargarSolicitudes(); window.cargarDashboard(); }
+      if (error) { 
+        window.mostrarToast('Error: ' + error.message, 'error'); 
+        console.error(error); 
+      } else { 
+        window.mostrarToast('Cobro guardado y contactos actualizados.'); 
+        window.cerrarModal('modal-gestion'); 
+        window.cargarSolicitudes(); 
+        window.cargarDashboard(); 
+      }
     };
 
     window.cargarCobros = async function() {
@@ -411,10 +447,11 @@
     window.registrarPagoManual = async function(cobroId, quien) {
       const updates = quien === 'proveedor' ? { proveedor_pagado: true } : { cliente_pagado: true };
       await window.db.from('cobros').update(updates).eq('id', cobroId);
+      window.mostrarToast('Pago registrado correctamente.');
       window.cargarCobros(); window.cargarDashboard();
     };
 
-    // 6. PROVEEDORES (CORREGIDO PARA UUIDs)
+    // 7. PROVEEDORES (BLINDADO)
     window.cargarProveedores = async function() {
       const { data } = await window.db.from('proveedores').select(`
         id, nombre_razon_social, whatsapp, anios_experiencia, equipo, metodo_cobro, disponibilidad, activo,
@@ -463,64 +500,50 @@
         document.getElementById('edit-prov-activo').checked = p.activo;
       }
 
-      // Cargar categorías
       const { data: cats } = await window.db.from('categorias').select('id, nombre').eq('activa', true).order('nombre');
       const selectCat = document.getElementById('edit-prov-categoria');
       let catHtml = '<option value="">Sin categoría</option>';
-      if (cats) {
-        catHtml += cats.map(c => `<option value="${c.id}" ${p && p.categoria_id === c.id ? 'selected' : ''}>${c.nombre}</option>`).join('');
-      }
+      if (cats) catHtml += cats.map(c => `<option value="${c.id}" ${p && p.categoria_id === c.id ? 'selected' : ''}>${c.nombre}</option>`).join('');
       selectCat.innerHTML = catHtml;
 
-      // Cargar zonas
       const { data: zonas } = await window.db.from('zonas').select('id, nombre').eq('activa', true).order('nombre');
       const selectZona = document.getElementById('edit-prov-zona');
       let zonaHtml = '<option value="">Sin zona</option>';
-      if (zonas) {
-        zonaHtml += zonas.map(z => `<option value="${z.id}" ${p && p.zona_id === z.id ? 'selected' : ''}>${z.nombre}</option>`).join('');
-      }
+      if (zonas) zonaHtml += zonas.map(z => `<option value="${z.id}" ${p && p.zona_id === z.id ? 'selected' : ''}>${z.nombre}</option>`).join('');
       selectZona.innerHTML = zonaHtml;
     };
 
-    // === AQUÍ ESTÁ LA CORRECCIÓN CLAVE PARA UUIDs ===
     window.guardarProveedor = async function() {
       const id = document.getElementById('edit-prov-id').value;
-      
-      // 1. Capturar los valores de los selects
       const catVal = document.getElementById('edit-prov-categoria').value;
       const zonaVal = document.getElementById('edit-prov-zona').value;
 
-      // 2. Construir el objeto de actualización, forzando NULL si el valor es cadena vacía
       const updates = {
         nombre_razon_social: document.getElementById('edit-prov-nombre').value,
         whatsapp: document.getElementById('edit-prov-whatsapp').value,
         anios_experiencia: parseInt(document.getElementById('edit-prov-exp').value) || 0,
-        
-        // ESTA ES LA CLAVE: Si es "", enviamos null. Supabase requiere null, no "", para campos UUID vacíos.
+        // Conversión estricta a null si está vacío, obligatorio para campos UUID en PostgreSQL
         categoria_id: catVal === "" ? null : catVal,
         zona_id: zonaVal === "" ? null : zonaVal,
-        
         equipo: document.getElementById('edit-prov-equipo').value,
         metodo_cobro: document.getElementById('edit-prov-metodo').value,
         disponibilidad: document.getElementById('edit-prov-disp').value,
         activo: document.getElementById('edit-prov-activo').checked
       };
 
-      console.log("Enviando a Supabase:", updates); // Para depuración en consola
-
       const { error } = await window.db.from('proveedores').update(updates).eq('id', id);
       
       if (error) {
-        alert('Error al guardar: ' + error.message);
         console.error("Error detallado:", error);
+        window.mostrarToast('Error al guardar: ' + error.message, 'error');
       } else {
-        alert('Proveedor actualizado correctamente.');
+        window.mostrarToast('Proveedor actualizado correctamente.');
         window.cerrarModal('modal-proveedor');
         window.cargarProveedores();
       }
     };
 
-    // 7. Catálogo
+    // 8. Catálogo
     window.cargarCatalogo = async function() {
       const { data: zonas } = await window.db.from('zonas').select('id, nombre, activa').order('nombre');
       const { data: categorias } = await window.db.from('categorias').select('id, nombre, activa').order('nombre');
@@ -530,20 +553,31 @@
 
     window.agregarZona = async function() {
       const nombre = document.getElementById('nueva-zona').value.trim();
-      if (nombre) { await window.db.from('zonas').insert({ nombre, activa: true }); document.getElementById('nueva-zona').value = ''; window.cargarCatalogo(); }
+      if (nombre) { 
+        await window.db.from('zonas').insert({ nombre, activa: true }); 
+        document.getElementById('nueva-zona').value = ''; 
+        window.mostrarToast('Zona agregada correctamente.');
+        window.cargarCatalogo(); 
+      }
     };
 
     window.agregarCategoria = async function() {
       const nombre = document.getElementById('nueva-categoria').value.trim();
-      if (nombre) { await window.db.from('categorias').insert({ nombre, activa: true }); document.getElementById('nueva-categoria').value = ''; window.cargarCatalogo(); }
+      if (nombre) { 
+        await window.db.from('categorias').insert({ nombre, activa: true }); 
+        document.getElementById('nueva-categoria').value = ''; 
+        window.mostrarToast('Categoría agregada correctamente.');
+        window.cargarCatalogo(); 
+      }
     };
 
     window.toggleCatalogo = async function(tabla, id, nuevoEstado) {
       await window.db.from(tabla).update({ activa: nuevoEstado }).eq('id', id);
+      window.mostrarToast('Estado actualizado.');
       window.cargarCatalogo();
     };
 
-    // 8. Mediaciones
+    // 9. Mediaciones
     window.cargarMediaciones = async function() {
       const { data } = await window.db.from('mediaciones').select('*, solicitudes (id)').order('created_at', { ascending: false });
       const container = document.getElementById('lista-mediaciones'); container.innerHTML = '';
@@ -556,7 +590,7 @@
       } else { container.innerHTML = '<p class="text-gray-500 text-center py-4">No hay mediaciones.</p>'; }
     };
 
-    // 9. Configuración
+    // 10. Configuración
     window.cargarConfiguracion = async function() {
       const { data } = await window.db.from('configuracion').select('valor').eq('clave', 'monto_comision_default').single();
       if (data) { window.montoDefault = parseFloat(data.valor); document.getElementById('config-monto').value = window.montoDefault; }
@@ -564,9 +598,9 @@
 
     window.guardarConfiguracion = async function() {
       const nuevoMonto = document.getElementById('config-monto').value;
-      if (!nuevoMonto || nuevoMonto < 0) return alert("Monto inválido.");
+      if (!nuevoMonto || nuevoMonto < 0) return window.mostrarToast("Monto inválido.", "error");
       await window.db.from('configuracion').upsert({ clave: 'monto_comision_default', valor: nuevoMonto });
-      alert('Configuración guardada. Nuevo monto: Bs ' + nuevoMonto);
+      window.mostrarToast('Configuración guardada. Nuevo monto: Bs ' + nuevoMonto);
       window.montoDefault = parseFloat(nuevoMonto);
     };
 
